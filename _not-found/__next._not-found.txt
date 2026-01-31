@@ -1,4 +1,4 @@
 1:"$Sreact.fragment"
 2:I[61413,["/wedding/_next/static/chunks/e0f48475c816761d.js"],"default"]
 3:I[64195,["/wedding/_next/static/chunks/e0f48475c816761d.js"],"default"]
-0:{"buildId":"J98lOaX84-P586FCg9xfZ","rsc":["$","$1","c",{"children":[null,["$","$L2",null,{"parallelRouterKey":"children","template":["$","$L3",null,{}]}]]}],"loading":null,"isPartial":false}
+0:{"buildId":"p3QE0B5P-HRrE9XhDYILn","rsc":["$","$1","c",{"children":[null,["$","$L2",null,{"parallelRouterKey":"children","template":["$","$L3",null,{}]}]]}],"loading":null,"isPartial":false}
