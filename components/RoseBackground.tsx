@@ -3,7 +3,7 @@
 export default function RoseBackground() {
   return (
     <video
-      src="/video/rose.webm"
+      src="video/rose.webm"
       autoPlay
       loop
       muted
