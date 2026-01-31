@@ -1,4 +1,4 @@
-:HL["/wedding/_next/static/chunks/ecf2e8aa881383fd.css","style"]
-:HL["/wedding/_next/static/media/Love-s.p.834776c8.otf","font",{"crossOrigin":"","type":"font/otf"}]
-:HL["/wedding/_next/static/media/brandon_bold-s.p.702f4451.otf","font",{"crossOrigin":"","type":"font/otf"}]
-0:{"buildId":"zrnZ22RIMDCrOkjFniyyR","tree":{"name":"","paramType":null,"paramKey":"","hasRuntimePrefetch":false,"slots":{"children":{"name":"__PAGE__","paramType":null,"paramKey":"__PAGE__","hasRuntimePrefetch":false,"slots":null,"isRootLayout":false}},"isRootLayout":true},"staleTime":300}
+:HL["/_next/static/chunks/ecf2e8aa881383fd.css","style"]
+:HL["/_next/static/media/Love-s.p.834776c8.otf","font",{"crossOrigin":"","type":"font/otf"}]
+:HL["/_next/static/media/brandon_bold-s.p.702f4451.otf","font",{"crossOrigin":"","type":"font/otf"}]
+0:{"buildId":"RbW8YAIQwkOD6F3MoJSxh","tree":{"name":"","paramType":null,"paramKey":"","hasRuntimePrefetch":false,"slots":{"children":{"name":"__PAGE__","paramType":null,"paramKey":"__PAGE__","hasRuntimePrefetch":false,"slots":null,"isRootLayout":false}},"isRootLayout":true},"staleTime":300}
