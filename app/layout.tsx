@@ -8,6 +8,10 @@ import Header from "@/components/Header"
 export const metadata: Metadata = {
   title: "Mika & Darshika",
   description: "Wedding website",
+  robots: {
+    index: false,
+    follow: false,
+  },
 }
 
 export default function RootLayout({

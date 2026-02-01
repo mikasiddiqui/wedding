@@ -29,28 +29,27 @@ export default function FloatingRSVP({
       setSubmitting(true)
       setSent(false)
 
-      const res = await fetch("https://formspree.io/f/xojljvjr", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
-        body: JSON.stringify({
-          email: "rsvp@mikadarshika.com",
-          _subject: `RSVP received — ${guestName}`,
-          invite_id: inviteId,
-          guest_name: guestName,
-          message: `RSVP button clicked by ${guestName}`,
-          source: window.location.href,
-        }),
-      })
+      const formData = new FormData()
+      formData.append("entry.841311756", guestName)
+      formData.append("entry.459515270", inviteId)
+      formData.append(
+        "entry.1705854182",
+        `RSVP button clicked by ${guestName} (${window.location.href})`
+      )
 
-      if (!res.ok) throw new Error("Formspree request failed")
+      await fetch(
+        "https://docs.google.com/forms/d/e/1FAIpQLSdFud7A7ipTA5ZCBSMpr5ceo1CCAIjvCdM051QAUDU0xRnvDg/formResponse",
+        {
+          method: "POST",
+          mode: "no-cors",
+          body: formData,
+        }
+      )
 
       setSent(true)
       setTimeout(() => setSent(false), 2000)
     } catch (e) {
-      alert("Couldn’t send RSVP test. Check Formspree + console.")
+      alert("Couldn’t send RSVP. Please try again.")
       console.error(e)
     } finally {
       setSubmitting(false)
