@@ -64,7 +64,7 @@ export default function Header() {
       </header>
 
       {/* Floating CTA lives with the state that controls it */}
-      <FloatingRSVP dialogOpen={open} />
+<FloatingRSVP dialogOpen={false} inviteId="jane-doe" guestName="Jane and Doe" />
     </>
   )
 }
