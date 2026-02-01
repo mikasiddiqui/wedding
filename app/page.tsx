@@ -2,6 +2,22 @@ export default function Home() {
   return (
     <main className="relative flex min-h-[80vh] items-center justify-center px-6">
       <div className="relative w-full max-w-[92vw] text-center">
+
+        <div
+          className="
+    text-[clamp(2.2rem,5vw,4rem)]
+    tracking-[0.28em]
+    uppercase
+    text-white
+    [text-rendering:optimizeLegibility]
+    [font-smooth:always]
+    [-webkit-text-stroke:0.3px_rgba(255,255,255,0.9)]
+  "
+        >
+          January 9th 2027
+        </div>
+
+
         <div
           className="
             relative z-10
@@ -16,13 +32,17 @@ export default function Home() {
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
           <span
             className="
-              leading-none opacity-60
-              text-[clamp(7.4rem,20vw,15rem)]
-            "
+      relative
+      top-[3rem]
+      leading-none
+      opacity-60
+      text-[clamp(7.4rem,20vw,15rem)]
+    "
           >
             &
           </span>
         </div>
+
 
         <div
           className="
