@@ -1,4 +1,4 @@
-:HL["/_next/static/chunks/dd5de0339a9768f3.css","style"]
+:HL["/_next/static/chunks/550eefcd89577db1.css","style"]
 :HL["/_next/static/media/Love-s.p.834776c8.otf","font",{"crossOrigin":"","type":"font/otf"}]
 :HL["/_next/static/media/brandon_bold-s.p.702f4451.otf","font",{"crossOrigin":"","type":"font/otf"}]
-0:{"buildId":"UAkIQ1dzItciJTeNLFrJZ","tree":{"name":"","paramType":null,"paramKey":"","hasRuntimePrefetch":false,"slots":{"children":{"name":"__PAGE__","paramType":null,"paramKey":"__PAGE__","hasRuntimePrefetch":false,"slots":null,"isRootLayout":false}},"isRootLayout":true},"staleTime":300}
+0:{"buildId":"f3dfohAi0P31ebP21lhQY","tree":{"name":"","paramType":null,"paramKey":"","hasRuntimePrefetch":false,"slots":{"children":{"name":"__PAGE__","paramType":null,"paramKey":"__PAGE__","hasRuntimePrefetch":false,"slots":null,"isRootLayout":false}},"isRootLayout":true},"staleTime":300}
