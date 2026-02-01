@@ -2,7 +2,6 @@ export default function Home() {
   return (
     <main className="relative flex min-h-[80vh] items-center justify-center px-6">
       <div className="relative w-full max-w-[92vw] text-center">
-        {/* Mika */}
         <div
           className="
             relative z-10
@@ -14,7 +13,6 @@ export default function Home() {
           Mika
         </div>
 
-        {/* Ampersand */}
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
           <span
             className="
@@ -26,7 +24,6 @@ export default function Home() {
           </span>
         </div>
 
-        {/* Darshika */}
         <div
           className="
             relative z-10 mt-[-1.6rem]
@@ -37,6 +34,7 @@ export default function Home() {
         >
           Darshika
         </div>
+
       </div>
     </main>
   )

@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "export": "next build && next export",
-    "deploy": "pnpm run build && touch out/.nojekyll && gh-pages -d out --dotfiles",
+    "deploy": "pnpm run build && touch out/.nojekyll && gh-pages -d out",
     "start": "next start",
     "lint": "eslint"
   },
