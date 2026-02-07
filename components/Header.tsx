@@ -17,7 +17,7 @@ export default function Header() {
 
   return (
     <>
-      <header className="relative z-40 grid grid-cols-2 items-center px-10 h-[96px]">
+      <header className="fixed inset-x-0 top-0 z-40 grid h-[96px] grid-cols-2 items-center px-10">
         <div className={`text-lg font-semibold tracking-wide text-rose-950/80`}>
           M
           <span className="mx-0.5 font-semibold text-red-800/80">&</span>

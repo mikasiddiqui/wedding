@@ -5,7 +5,12 @@ export const love = localFont({
   display: "swap",
 })
 
-export const brandon = localFont({
-  src: "./brandon-bold.otf",
+export const sangbleu = localFont({
+  src: [
+    { path: "./sangbleusunrise-light.otf", weight: "300", style: "normal" },
+    { path: "./sangbleusunrise-regular.otf", weight: "400", style: "normal" },
+    { path: "./sangbleusunrise-medium.otf", weight: "500", style: "normal" },
+    { path: "./sangbleusunrise-bold.otf", weight: "700", style: "normal" },
+  ],
   display: "swap",
 })

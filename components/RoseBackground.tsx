@@ -8,7 +8,7 @@ export default function RoseBackground() {
       loop
       muted
       playsInline
-      preload="auto"
+      preload="metadata"
       ref={(el) => {
         if (el) el.playbackRate = 0.8
       }}

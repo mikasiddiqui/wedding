@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import { brandon } from "../app/fonts"
+import { sangbleu } from "../app/fonts"
 
 type FloatingRSVPProps = {
   dialogOpen: boolean
@@ -18,7 +18,7 @@ export default function FloatingRSVP({
   const [submitting, setSubmitting] = useState(false)
   const [sent, setSent] = useState(false)
 
-  const base = `${brandon.className}
+  const base = `${sangbleu.className} font-medium
     h-12 rounded-full px-12 text-lg tracking-widest transition-colors`
 
   const hero = "bg-white/80 text-black/70 hover:bg-white"
