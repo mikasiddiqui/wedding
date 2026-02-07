@@ -1,6 +1,11 @@
 {
-  "jane-doe": "Jane and Doe",
-  "john-smith": "John & Family",
-  "alex-sam": "Alex and Sam",
-  "vip-001": "Our Dearest Friends"
+  "steph-justin": {
+    "title": "Steph and Justin",
+    "people": [{"name": "Stephanie Lastname"}, {"name": "Justin Lastname"}]
+  },
+  "richard-yifan": {
+    "title": "Richard and Yifan",
+    "people": [{"name": "Richard Li"}, {"name": "Yifan Lastname"}]
+
+  }
 }

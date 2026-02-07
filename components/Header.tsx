@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import {
   Dialog,
   DialogTrigger,
@@ -10,10 +10,25 @@ import {
 } from "@/components/ui/dialog"
 import { Menu, X } from "lucide-react"
 import FloatingRSVP from "@/components/FloatingRSVP"
+import invites from "@/app/data/invites.json"
 
 
 export default function Header() {
   const [open, setOpen] = useState(false)
+  const [inviteId, setInviteId] = useState<string | undefined>(undefined)
+  const [guestTitle, setGuestTitle] = useState<string | undefined>(undefined)
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const id = params.get("invite") ?? undefined
+    if (id && id in invites) {
+      setInviteId(id)
+      setGuestTitle((invites as Record<string, { title: string }>)[id]?.title)
+    } else {
+      setInviteId(undefined)
+      setGuestTitle(undefined)
+    }
+  }, [])
 
   return (
     <>
@@ -53,9 +68,15 @@ export default function Header() {
 
               <div className="px-12 pt-24">
                 <nav className="space-y-10 text-[clamp(3.5rem,8vw,6rem)] text-rose-900 leading-none">
-                  <a href="#" className="block">TRAVEL</a>
-                  <a href="#" className="block">REGISTRY</a>
-                  <a href="#" className="block">DETAILS</a>
+                  <DialogClose asChild>
+                    <a href="#invitation" className="block">INVITATION</a>
+                  </DialogClose>
+                  <DialogClose asChild>
+                    <a href="#schedule" className="block">SCHEDULE</a>
+                  </DialogClose>
+                  <DialogClose asChild>
+                    <a href="#faq" className="block">FAQ</a>
+                  </DialogClose>
                 </nav>
               </div>
             </DialogContent>
@@ -64,7 +85,9 @@ export default function Header() {
       </header>
 
       {/* Floating CTA lives with the state that controls it */}
-<FloatingRSVP dialogOpen={false} inviteId="jane-doe" guestName="Jane and Doe" />
+{inviteId ? (
+  <FloatingRSVP dialogOpen={false} inviteId={inviteId} guestName={guestTitle} />
+) : null}
     </>
   )
 }

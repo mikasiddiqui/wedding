@@ -69,7 +69,9 @@ export default function Home() {
     const inviteId = params.get("invite")
 
     if (inviteId && inviteId in invites) {
-      setGuestName(invites[inviteId as keyof typeof invites])
+      setGuestName(
+        invites[inviteId as keyof typeof invites]?.title ?? null
+      )
     }
   }, [])
 
@@ -151,6 +153,7 @@ export default function Home() {
       {/* NEXT CONTENT */}
       <div
         ref={inviteRef}
+        id="invitation"
         className="relative h-[100dvh] snap-start [scroll-snap-stop:always] [content-visibility:auto] [contain-intrinsic-size:100dvh]"
       >
         <div className="grid h-full place-items-center pt-[96px] pb-[14rem] md:pb-[12rem] box-border">
@@ -255,6 +258,7 @@ export default function Home() {
       {/* SLIDE 3 */}
       <div
         ref={scheduleRef}
+        id="schedule"
         className="relative h-[100dvh] snap-start [scroll-snap-stop:always] [content-visibility:auto] [contain-intrinsic-size:100dvh]"
       >
         <div className="grid h-full place-items-center pt-[96px] pb-[18rem] md:pb-[12rem] box-border">
@@ -320,6 +324,7 @@ export default function Home() {
       {/* FAQ */}
       <div
         ref={faqRef}
+        id="faq"
         className="relative h-[100dvh] snap-start [scroll-snap-stop:always] [content-visibility:auto] [contain-intrinsic-size:100dvh]"
       >
         <div className="grid h-full place-items-center pt-[96px] pb-[14rem] md:pb-[12rem] box-border">
