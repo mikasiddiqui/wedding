@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -17,10 +17,72 @@ import {
 import invites from "@/app/data/invites.json"
 import { sangbleu } from "../app/fonts"
 
+type Person = { name: string; confirmed?: number | boolean }
+type InviteRecord = { title?: string; people: Person[] }
+
 type FloatingRSVPProps = {
   dialogOpen: boolean
   inviteId?: string
   guestName?: string
+}
+
+type RemoteInviteState = {
+  invite: InviteRecord | null
+  loading: boolean
+  error: string | null
+  refresh: () => void
+}
+
+const buildApiHeaders = (token?: string, contentType?: string) => {
+  const headers: Record<string, string> = {}
+  if (contentType) headers["Content-Type"] = contentType
+  if (token) headers["X-Invite-Token"] = token
+  return headers
+}
+
+const useRemoteInvite = (inviteId?: string): RemoteInviteState => {
+  const apiUrl = process.env.NEXT_PUBLIC_RSVP_API_URL
+  const apiToken = process.env.NEXT_PUBLIC_RSVP_API_TOKEN
+  const [invite, setInvite] = useState<InviteRecord | null>(null)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const refresh = useCallback(() => {
+    if (!apiUrl || !inviteId) return
+    let active = true
+    setLoading(true)
+    setError(null)
+    fetch(`${apiUrl}?inviteId=${encodeURIComponent(inviteId)}`, {
+      method: "GET",
+      headers: buildApiHeaders(apiToken),
+    })
+      .then(async (res) => {
+        if (!res.ok) throw new Error("Failed to load RSVP data.")
+        return (await res.json()) as InviteRecord
+      })
+      .then((data) => {
+        if (active) setInvite(data)
+      })
+      .catch((err) => {
+        if (active) setError(err.message || "Unable to load RSVP data.")
+      })
+      .finally(() => {
+        if (active) setLoading(false)
+      })
+
+    return () => {
+      active = false
+    }
+  }, [apiUrl, inviteId, apiToken])
+
+  useEffect(() => {
+    const cleanup = refresh()
+    return () => {
+      if (typeof cleanup === "function") cleanup()
+    }
+  }, [refresh])
+
+  return { invite, loading, error, refresh }
 }
 
 export default function FloatingRSVP({
@@ -33,9 +95,6 @@ export default function FloatingRSVP({
   const [sent, setSent] = useState(false)
   const [selected, setSelected] = useState<Record<string, boolean>>({})
   const [confirmed, setConfirmed] = useState<Record<string, boolean>>({})
-  const [remoteInvite, setRemoteInvite] = useState<InviteRecord | null>(null)
-  const [remoteLoading, setRemoteLoading] = useState(false)
-  const [remoteError, setRemoteError] = useState<string | null>(null)
 
   const base = `${sangbleu.className} font-medium
     h-12 rounded-full px-12 text-lg tracking-widest transition-colors`
@@ -43,38 +102,14 @@ export default function FloatingRSVP({
   const hero = "bg-white/80 text-black/70 hover:bg-white"
   const dialog = "bg-red-900/80 text-rose-100 hover:bg-red-900"
 
-  type Person = { name: string; confirmed?: number | boolean }
-  type InviteRecord = { title?: string; people: Person[] }
-
   const apiUrl = process.env.NEXT_PUBLIC_RSVP_API_URL
+  const apiToken = process.env.NEXT_PUBLIC_RSVP_API_TOKEN
   const localInvite = (invites as Record<string, InviteRecord>)[inviteId]
-
-  useEffect(() => {
-    if (!apiUrl || !inviteId) return
-    let active = true
-    setRemoteLoading(true)
-    setRemoteError(null)
-    fetch(`${apiUrl}?inviteId=${encodeURIComponent(inviteId)}`, {
-      method: "GET",
-    })
-      .then(async (res) => {
-        if (!res.ok) throw new Error("Failed to load RSVP data.")
-        return (await res.json()) as InviteRecord
-      })
-      .then((data) => {
-        if (active) setRemoteInvite(data)
-      })
-      .catch((err) => {
-        if (active) setRemoteError(err.message || "Unable to load RSVP data.")
-      })
-      .finally(() => {
-        if (active) setRemoteLoading(false)
-      })
-
-    return () => {
-      active = false
-    }
-  }, [apiUrl, inviteId])
+  const {
+    invite: remoteInvite,
+    loading: remoteLoading,
+    error: remoteError,
+  } = useRemoteInvite(inviteId)
 
   const basePeople = useMemo<Person[]>(() => {
     if (localInvite?.people?.length) return localInvite.people
@@ -156,48 +191,31 @@ export default function FloatingRSVP({
       setSubmitting(true)
       setSent(false)
 
-      const selectedPeople = people
-        .filter((person) => selected[person.name])
-        .map((person) => person.name)
-
-      const formData = new FormData()
-      formData.append(
-        "entry.841311756",
-        remoteInvite?.title ?? localInvite?.title ?? guestName
-      )
-      formData.append("entry.459515270", inviteId)
-      formData.append(
-        "entry.1705854182",
-        `RSVP confirmed for ${selectedPeople.join(", ")} — ${
-          remoteInvite?.title ?? localInvite?.title ?? guestName
-        } (${window.location.href})`
-      )
-
       if (apiUrl && inviteId) {
-      const apiResponse = await fetch(apiUrl, {
-        method: "POST",
-        headers: { "Content-Type": "text/plain;charset=UTF-8" },
-        body: JSON.stringify({
-          inviteId,
-          title: remoteInvite?.title ?? localInvite?.title ?? guestName,
-          people: people.map((person) => ({
-            name: person.name,
-            confirmed: selected[person.name] ? 1 : 0,
-          })),
-        }),
-      })
+        const apiResponse = await fetch(apiUrl, {
+          method: "POST",
+          headers: buildApiHeaders(apiToken, "text/plain;charset=UTF-8"),
+          body: JSON.stringify({
+            inviteId,
+            title: remoteInvite?.title ?? localInvite?.title ?? guestName,
+            people: people.map((person) => ({
+              name: person.name,
+              confirmed: selected[person.name] ? 1 : 0,
+            })),
+          }),
+        })
 
-      const responseText = await apiResponse.text()
-      const apiJson = (() => {
-        try {
-          return JSON.parse(responseText)
-        } catch {
-          return null
+        const responseText = await apiResponse.text()
+        const apiJson = (() => {
+          try {
+            return JSON.parse(responseText)
+          } catch {
+            return null
+          }
+        })()
+        if (!apiResponse.ok || !apiJson || apiJson?.error) {
+          throw new Error(apiJson?.error || "RSVP update failed.")
         }
-      })()
-      if (!apiResponse.ok || !apiJson || apiJson?.error) {
-        throw new Error(apiJson?.error || "RSVP update failed.")
-      }
       }
 
       setConfirmed((prev) => {
