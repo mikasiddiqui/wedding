@@ -10,6 +10,13 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion"
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel"
 
 function useInViewOnce(
   targetRef: RefObject<HTMLElement | null>,
@@ -55,11 +62,17 @@ export default function Home() {
   const inviteRef = useRef<HTMLDivElement | null>(null)
   const scheduleRef = useRef<HTMLDivElement | null>(null)
   const faqRef = useRef<HTMLDivElement | null>(null)
+  const galleryRef = useRef<HTMLDivElement | null>(null)
 
   const heroInView = useInViewOnce(heroRef, mainRef, 0.6)
   const inviteInView = useInViewOnce(inviteRef, mainRef, 0.6)
   const scheduleInView = useInViewOnce(scheduleRef, mainRef, 0.6)
   const faqInView = useInViewOnce(faqRef, mainRef, 0.6)
+  const galleryInView = useInViewOnce(galleryRef, mainRef, 0.6)
+
+  const galleryImages = Array.from({ length: 11 }, (_, index) => {
+    return `/images/gallery/${index + 1}.jpg`
+  })
 
   const revealBase =
     "transition-[opacity,transform] duration-[1760ms] ease-out will-change-transform"
@@ -430,6 +443,62 @@ export default function Home() {
                 </Accordion>
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* GALLERY */}
+      <div
+        ref={galleryRef}
+        id="gallery"
+        className="relative h-[100dvh] snap-start [scroll-snap-stop:always] [content-visibility:auto] [contain-intrinsic-size:100dvh]"
+      >
+        <div className="grid h-full place-items-center pt-[96px] pb-[12rem] md:pb-[10rem] box-border">
+          <div className="w-full max-w-[min(92vw,96rem)] px-4">
+            <div
+              className={`
+                ${revealBase} ${galleryInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"} delay-[320ms]
+                ${sangbleu.className}
+                text-center
+                text-[clamp(2.4rem,7vw,4.6rem)]
+                tracking-tight
+                text-white
+              `}
+            >
+              Gallery
+            </div>
+            <div
+              className={`
+                ${revealBase} ${galleryInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"} delay-[640ms]
+                mt-8
+              `}
+            >
+              <Carousel
+                className="w-full"
+                opts={{ align: "start", loop: true }}
+              >
+                <CarouselContent>
+                  {galleryImages.map((src, index) => (
+                    <CarouselItem
+                      key={src}
+                      className="basis-full sm:basis-1/2 lg:basis-1/3"
+                    >
+                      <div className="h-[50vh] max-h-[560px] w-full overflow-hidden rounded-[24px] border border-white/20 bg-white/5">
+                        <img
+                          src={src}
+                          alt={`Gallery photo ${index + 1}`}
+                          className="h-full w-full object-cover"
+                          loading="lazy"
+                          decoding="async"
+                        />
+                      </div>
+                    </CarouselItem>
+                  ))}
+                </CarouselContent>
+                <CarouselPrevious className="border-white/60 bg-white/10 text-white hover:bg-white/20" />
+                <CarouselNext className="border-white/60 bg-white/10 text-white hover:bg-white/20" />
+              </Carousel>
             </div>
           </div>
         </div>

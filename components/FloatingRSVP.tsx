@@ -3,7 +3,8 @@
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Checkbox } from "@/components/ui/checkbox"
+import { Label } from "@/components/ui/label"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import {
   Dialog,
   DialogClose,
@@ -93,7 +94,7 @@ export default function FloatingRSVP({
   const [open, setOpen] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [sent, setSent] = useState(false)
-  const [selected, setSelected] = useState<Record<string, boolean>>({})
+  const [selected, setSelected] = useState<Record<string, "attending" | "not">>({})
   const [confirmed, setConfirmed] = useState<Record<string, boolean>>({})
 
   const base = `${sangbleu.className} font-medium
@@ -129,6 +130,12 @@ export default function FloatingRSVP({
     }))
   }, [remoteInvite, basePeople])
 
+  const remoteNameSet = useMemo(
+    () => new Set(remoteInvite?.people?.map((person) => person.name) ?? []),
+    [remoteInvite]
+  )
+  const remoteFetched = Boolean(apiUrl && remoteInvite && !remoteLoading && !remoteError)
+
   const initialConfirmed = useMemo(() => {
     const next: Record<string, boolean> = {}
     people.forEach((person) => {
@@ -162,29 +169,16 @@ export default function FloatingRSVP({
 
   useEffect(() => {
     if (!open) return
-    const next: Record<string, boolean> = {}
-    if (Object.keys(confirmed).length) {
-      people.forEach((person) => {
-        next[person.name] = Boolean(confirmed[person.name])
-      })
-    } else {
-      people.forEach((person) => {
-        next[person.name] = true
-      })
-    }
-    setSelected(next)
-  }, [open, people, confirmed])
-
-  const allSelected =
-    people.length > 0 && people.every((person) => selected[person.name])
-
-  const handleSelectAll = (checked: boolean) => {
-    const next: Record<string, boolean> = {}
+    const next: Record<string, "attending" | "not"> = {}
     people.forEach((person) => {
-      next[person.name] = checked
+      if (remoteFetched && !remoteNameSet.has(person.name)) {
+        next[person.name] = "attending"
+        return
+      }
+      next[person.name] = confirmed[person.name] ? "attending" : "not"
     })
     setSelected(next)
-  }
+  }, [open, people, confirmed, remoteFetched, remoteNameSet])
 
   const handleConfirm = async () => {
     try {
@@ -200,7 +194,7 @@ export default function FloatingRSVP({
             title: remoteInvite?.title ?? localInvite?.title ?? guestName,
             people: people.map((person) => ({
               name: person.name,
-              confirmed: selected[person.name] ? 1 : 0,
+              confirmed: selected[person.name] === "attending" ? 1 : 0,
             })),
           }),
         })
@@ -221,7 +215,7 @@ export default function FloatingRSVP({
       setConfirmed((prev) => {
         const next = { ...prev }
         people.forEach((person) => {
-          next[person.name] = Boolean(selected[person.name])
+          next[person.name] = selected[person.name] === "attending"
         })
         if (!apiUrl) {
           const storageKey = inviteId ? `rsvp-confirmed:${inviteId}` : null
@@ -270,19 +264,16 @@ export default function FloatingRSVP({
             </DialogHeader>
 
             <div className="mt-4 rounded-[16px] border border-white/20 bg-white/5 px-4 py-4">
-              <div className="flex items-center justify-between border-b border-white/10 pb-3">
+              <div className="grid grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-4 border-b border-white/10 pb-3">
                 <div className="text-sm uppercase tracking-[0.2em] text-white/80">
                   Guests
                 </div>
-                <label className="flex items-center gap-2 text-sm text-white/90">
-                  <Checkbox
-                    checked={allSelected}
-                    onCheckedChange={(value) => handleSelectAll(Boolean(value))}
-                    disabled={remoteLoading}
-                    className="bg-white text-rose-900 data-[state=checked]:bg-white data-[state=checked]:text-rose-900 border-white/80"
-                  />
-                  Select all
-                </label>
+                <div className="text-sm uppercase tracking-[0.2em] text-white/80">
+                  Status
+                </div>
+                <div className="text-sm uppercase tracking-[0.2em] text-white/80">
+                  Attending
+                </div>
               </div>
               <div className="mt-4 space-y-3">
                 {remoteLoading ? (
@@ -297,32 +288,57 @@ export default function FloatingRSVP({
                     {people.map((person, index) => (
                       <div
                         key={`${person.name}-${index}`}
-                        className="flex items-center justify-between text-[clamp(1rem,2.3vw,1.4rem)]"
+                        className="grid grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-4 text-[clamp(1rem,2.3vw,1rem)]"
                       >
-                        <div className="flex items-center gap-3">
-                          <span>{person.name}</span>
-                          <Badge
-                            variant="outline"
-                            className={
-                              confirmed[person.name]
-                                ? "border-white/60 bg-white text-rose-900"
-                                : "border-white/30 text-white/70"
-                            }
-                          >
-                            {confirmed[person.name] ? "Confirmed" : "Not confirmed"}
-                          </Badge>
-                        </div>
-                        <Checkbox
-                          checked={Boolean(selected[person.name])}
-                          onCheckedChange={(value) =>
+                        <span>{person.name}</span>
+                        <Badge
+                          variant="outline"
+                          className={
+                            remoteFetched && !remoteNameSet.has(person.name)
+                              ? "border-white/30 text-white/70"
+                              : confirmed[person.name]
+                              ? "border-white/60 bg-white text-rose-900"
+                              : "border-white/30 text-white/70"
+                          }
+                        >
+                          {remoteFetched && !remoteNameSet.has(person.name)
+                            ? "Not confirmed"
+                            : confirmed[person.name]
+                            ? "Attending"
+                            : "Not attending"}
+                        </Badge>
+                        <RadioGroup
+                          value={selected[person.name]}
+                          onValueChange={(value) =>
                             setSelected((prev) => ({
                               ...prev,
-                              [person.name]: Boolean(value),
+                              [person.name]: value as "attending" | "not",
                             }))
                           }
                           disabled={remoteLoading}
-                          className="bg-white text-rose-900 data-[state=checked]:bg-white data-[state=checked]:text-rose-900 border-white/80"
-                        />
+                          className="flex items-center gap-6"
+                        >
+                          <div className="flex items-center gap-2">
+                            <RadioGroupItem
+                              value="attending"
+                              id={`${person.name}-attending`}
+                              className="border-white text-rose-900 data-[state=checked]:border-white data-[state=checked]:bg-white"
+                            />
+                            <Label htmlFor={`${person.name}-attending`} className="text-white/90">
+                              Yes
+                            </Label>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <RadioGroupItem
+                              value="not"
+                              id={`${person.name}-not`}
+                              className="border-white text-rose-900 data-[state=checked]:border-white data-[state=checked]:bg-white"
+                            />
+                            <Label htmlFor={`${person.name}-not`} className="text-white/90">
+                              No
+                            </Label>
+                          </div>
+                        </RadioGroup>
                       </div>
                     ))}
                   </>

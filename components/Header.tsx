@@ -77,6 +77,9 @@ export default function Header() {
                   <DialogClose asChild>
                     <a href="#faq" className="block">FAQ</a>
                   </DialogClose>
+                  <DialogClose asChild>
+                    <a href="#gallery" className="block">GALLERY</a>
+                  </DialogClose>
                 </nav>
               </div>
             </DialogContent>
