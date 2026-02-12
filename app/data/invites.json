@@ -1,11 +1,35 @@
 {
   "steph-justin": {
     "title": "Steph and Justin",
-    "people": [{"name": "Stephanie Lastname"}, {"name": "Justin Lastname"}]
+    "people": [
+      {
+        "name": "Stephanie Lastname"
+      },
+      {
+        "name": "Justin Lastname"
+      }
+    ]
   },
   "richard-yifan": {
     "title": "Richard and Yifan",
-    "people": [{"name": "Richard Li"}, {"name": "Yifan Lastname"}]
-
+    "people": [
+      {
+        "name": "Richard Li"
+      },
+      {
+        "name": "Yifan Lastname"
+      }
+    ]
+  },
+  "uday-sashi": {
+    "title": "Uday and Sashi",
+    "people": [
+      {
+        "name": "Uday Narain"
+      },
+      {
+        "name": "Sashi Narain"
+      }
+    ]
   }
 }
