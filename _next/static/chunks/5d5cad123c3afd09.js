@@ -1,1 +1,0 @@
-(globalThis.TURBOPACK||(globalThis.TURBOPACK=[])).push(["object"==typeof document?document.currentScript:void 0,11309,e=>{e.v({"steph-justin":{title:"Steph and Justin",people:[{name:"Stephanie Lastname"},{name:"Justin Lastname"}]},"richard-yifan":{title:"Richard and Yifan",people:[{name:"Richard Li"},{name:"Yifan Lastname"}]}})}]);
