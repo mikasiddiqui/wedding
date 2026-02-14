@@ -15,7 +15,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import invites from "@/app/data/invites.json"
 import { sangbleu } from "../app/fonts"
 
 type Person = { name: string; confirmed?: number | boolean | string | null }
@@ -120,33 +119,30 @@ export default function FloatingRSVP({
 
   const apiUrl = process.env.NEXT_PUBLIC_RSVP_API_URL
   const apiToken = process.env.NEXT_PUBLIC_RSVP_API_TOKEN
-  const localInvite = (invites as Record<string, InviteRecord>)[inviteId]
   const {
     invite: remoteInvite,
     loading: remoteLoading,
     error: remoteError,
     refresh: refreshRemoteInvite,
   } = useRemoteInvite(inviteId)
+  const inviteTitle = useMemo(() => {
+    const remoteTitle = remoteInvite?.title?.trim()
+    if (remoteTitle) return remoteInvite?.title ?? guestName
+    return guestName
+  }, [remoteInvite, guestName])
 
   const basePeople = useMemo<Person[]>(() => {
-    if (localInvite?.people?.length) return localInvite.people
-    if (guestName) return [{ name: guestName }]
-    return []
-  }, [localInvite, guestName])
-
-  const people = useMemo<Person[]>(() => {
-    if (!remoteInvite?.people?.length) return basePeople
+    if (!remoteInvite?.people?.length) return []
     const namesAreValid = remoteInvite.people.every(
       (person) => typeof person.name === "string" && person.name.trim().length > 0
     )
     if (namesAreValid) return remoteInvite.people
-    return basePeople.map((person, index) => ({
+    return remoteInvite.people.map((person) => ({
       name: person.name,
-      confirmed: normalizeConfirmed(
-        remoteInvite.people[index]?.confirmed ?? person.confirmed ?? null
-      ),
+      confirmed: normalizeConfirmed(person.confirmed ?? null),
     }))
-  }, [remoteInvite, basePeople])
+  }, [remoteInvite])
+  const people = basePeople
 
   const remoteNameSet = useMemo(
     () => new Set(remoteInvite?.people?.map((person) => person.name) ?? []),
@@ -217,7 +213,7 @@ export default function FloatingRSVP({
           mode: postMode,
           body: JSON.stringify({
             inviteId,
-            title: remoteInvite?.title ?? localInvite?.title ?? guestName,
+            title: inviteTitle,
             people: people.map((person) => ({
               name: person.name,
               confirmed: selected[person.name] === "attending" ? 1 : 0,
@@ -295,7 +291,7 @@ export default function FloatingRSVP({
                 Confirm your RSVP
               </DialogTitle>
               <DialogDescription className="text-white/80">
-                Select who is attending for {remoteInvite?.title ?? localInvite?.title ?? guestName}.
+                Select who is attending for {inviteTitle}.
                 You can update your selection any time and confirm again.
               </DialogDescription>
             </DialogHeader>

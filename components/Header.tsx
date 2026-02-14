@@ -10,25 +10,50 @@ import {
 } from "@/components/ui/dialog"
 import { Menu, X } from "lucide-react"
 import FloatingRSVP from "@/components/FloatingRSVP"
-import invites from "@/app/data/invites.json"
 
 
 export default function Header() {
   const [open, setOpen] = useState(false)
   const [inviteId, setInviteId] = useState<string | undefined>(undefined)
   const [guestTitle, setGuestTitle] = useState<string | undefined>(undefined)
+  const apiUrl = process.env.NEXT_PUBLIC_RSVP_API_URL
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
     const id = params.get("invite") ?? undefined
-    if (id && id in invites) {
-      setInviteId(id)
-      setGuestTitle((invites as Record<string, { title: string }>)[id]?.title)
-    } else {
+    if (!id || !apiUrl) {
       setInviteId(undefined)
       setGuestTitle(undefined)
+      return
     }
-  }, [])
+
+    let active = true
+    fetch(`${apiUrl}?inviteId=${encodeURIComponent(id)}`)
+      .then(async (res) => {
+        if (!res.ok) return null
+        return (await res.json()) as { title?: string; people?: unknown[] }
+      })
+      .then((data) => {
+        if (!active) return
+        const people = Array.isArray(data?.people) ? data.people : []
+        if (people.length === 0) {
+          setInviteId(undefined)
+          setGuestTitle(undefined)
+          return
+        }
+        setInviteId(id)
+        setGuestTitle(typeof data?.title === "string" ? data.title : undefined)
+      })
+      .catch(() => {
+        if (!active) return
+        setInviteId(undefined)
+        setGuestTitle(undefined)
+      })
+
+    return () => {
+      active = false
+    }
+  }, [apiUrl])
 
   return (
     <>

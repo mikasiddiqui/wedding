@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from "react"
 import type { RefObject } from "react"
-import invites from "@/app/data/invites.json"
 import { sangbleu } from "./fonts"
 import {
   Accordion,
@@ -81,11 +80,32 @@ export default function Home() {
     const params = new URLSearchParams(window.location.search)
     const inviteId = params.get("invite")
 
-    if (inviteId && inviteId in invites) {
-      setGuestName(
-        invites[inviteId as keyof typeof invites]?.title ?? null
-      )
+    if (!inviteId) return
+
+    const apiUrl = process.env.NEXT_PUBLIC_RSVP_API_URL
+    if (!apiUrl) return
+
+    const controller = new AbortController()
+
+    const loadGuestName = async () => {
+      try {
+        const response = await fetch(
+          `${apiUrl}?inviteId=${encodeURIComponent(inviteId)}`,
+          { signal: controller.signal }
+        )
+        if (!response.ok) return
+        const data = await response.json()
+        const title = typeof data?.title === "string" ? data.title : ""
+        setGuestName(title ? title : null)
+      } catch (error) {
+        if ((error as Error).name !== "AbortError") {
+          setGuestName(null)
+        }
+      }
     }
+
+    loadGuestName()
+    return () => controller.abort()
   }, [])
 
   return (
