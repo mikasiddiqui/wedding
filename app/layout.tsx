@@ -4,9 +4,12 @@ import { love } from "../app/fonts"
 import RoseBackground from "@/components/RoseBackground"
 import Header from "@/components/Header"
 
+const siteUrl = "https://mikadarshika.com"
+const ogImageJpg = `${siteUrl}/og.jpg`
+const ogImagePng = `${siteUrl}/og.png`
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://mikadarshika.com"),
+  metadataBase: new URL(siteUrl),
   title: "Mika & Darshika",
   description: "Mika and Darshika's wedding. RSVP online.",
   manifest: "/favicon/site.webmanifest",
@@ -19,11 +22,24 @@ export const metadata: Metadata = {
     apple: [{ url: "/favicon/apple-touch-icon.png", sizes: "180x180" }],
   },
   openGraph: {
+    type: "website",
+    url: siteUrl,
+    siteName: "Mika & Darshika",
     title: "Mika & Darshika",
     description: "Mika and Darshika's wedding. RSVP online.",
     images: [
       {
-        url: "/og.png",
+        url: ogImageJpg,
+        width: 1200,
+        height: 630,
+        type: "image/jpeg",
+        alt: "Mika & Darshika",
+      },
+      {
+        url: ogImagePng,
+        width: 1200,
+        height: 630,
+        type: "image/png",
         alt: "Mika & Darshika",
       },
     ],
@@ -32,7 +48,14 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Mika & Darshika",
     description: "Mika and Darshika's wedding. RSVP online.",
-    images: ["/og.png"],
+    images: [
+      {
+        url: ogImageJpg,
+        width: 1200,
+        height: 630,
+        alt: "Mika & Darshika",
+      },
+    ],
   },
   robots: {
     index: false,
