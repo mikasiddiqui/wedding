@@ -99,7 +99,7 @@ export default function Home() {
         ref={heroRef}
         className="relative h-[100dvh] snap-start [scroll-snap-stop:always]"
       >
-        <div className="grid h-full place-items-center pt-[96px] pb-[14rem] md:pb-[12rem] box-border">
+        <div className="grid h-full place-items-center pt-[96px] pb-[calc(12vh+env(safe-area-inset-bottom))] sm:pb-[10vh] md:pb-[12rem] box-border">
           <div className="relative w-full max-w-[92vw] text-center">
 
           {/* Date */}
@@ -195,7 +195,7 @@ export default function Home() {
                     text-[clamp(2.4rem,8vw,4.4rem)]
                     tracking-tight
                     text-white
-                    pb-13
+                    pb-6 sm:pb-8
                     leading-none
                     ${revealBase} ${inviteInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"} delay-[640ms]
                   `}
@@ -208,9 +208,8 @@ export default function Home() {
                       rounded-[28px]
                       border border-white/60
                       bg-white/5
-                      px-6 py-10
+                      px-4 py-6 sm:px-6 sm:py-8 md:px-10 md:py-10
                       backdrop-blur-[2px]
-                      md:px-10
                       ${revealBase} ${inviteInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"} delay-[960ms]
                     `}
                   >
@@ -218,30 +217,31 @@ export default function Home() {
                       className={`
                         ${sangbleu.className}
                         mx-auto max-w-[70ch]
-                        text-[clamp(1.05rem,2.4vw,1.75rem)]
+                        text-[clamp(0.95rem,2.3vw,1.6rem)]
                         font-normal
-                        leading-relaxed
+                        leading-snug sm:leading-relaxed
                         text-white/95
                         ${revealBase} ${inviteInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-3"} delay-[1280ms]
                       `}
                     >
-                      <div className="text-[clamp(1rem,2.3vw,1.5rem)] text-white/95">
-                        Uday &amp; Sashi Narain and Sophia Sangsongkhram
+                      <div className="text-[clamp(0.95rem,2.2vw,1.4rem)] text-white/95">
+                        Uday &amp; Sashi Narayan and Sophia Sangsongkhram
                       </div>
-                      <div className="mt-3 text-[clamp(1rem,2.3vw,1.5rem)] text-white/95">
+                      <div className="mt-2 sm:mt-3 text-[clamp(0.95rem,2.2vw,1.4rem)] text-white/95">
                         joyfully invite you to celebrate the wedding of
                       </div>
-                      <div className="mt-3 text-[clamp(1rem,2.3vw,1.5rem)] text-white/95">
+                      <div className="mt-2 sm:mt-3 text-[clamp(0.95rem,2.2vw,1.4rem)] text-white/95">
                         Mika &amp; Darshika
                       </div>
                     </div>
                     <div
                       className={`
                         ${sangbleu.className}
-                        mt-8
-                        text-[clamp(0.9rem,2vw,1.1rem)]
+                        mt-6 sm:mt-8
+                        text-[clamp(0.78rem,1.9vw,1.05rem)]
                         font-medium
-                        tracking-[0.12em]
+                        tracking-[0.1em]
+                        leading-snug sm:leading-relaxed
                         text-white/90
                         ${revealBase} ${inviteInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-3"} delay-[1600ms]
                       `}
@@ -253,9 +253,9 @@ export default function Home() {
                         Wedding date: 9 January 2027
                       </div>
                       <div className="mt-2">
-                        Residence: Narain Residence, Glen Innes, Auckland, New Zealand
+                        Residence: Narayan Residence, Glen Innes, Auckland, New Zealand
                       </div>
-                      <div className="mt-8">
+                      <div className="mt-6 sm:mt-8">
                         Kindly RSVP by{" "}
                         <span className={`${sangbleu.className} font-bold`}>31 March 2026</span>
                       </div>
