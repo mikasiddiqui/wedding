@@ -6,7 +6,6 @@ import Header from "@/components/Header"
 
 const siteUrl = "https://mikadarshika.com"
 const ogImageJpg = `${siteUrl}/og.jpg`
-const ogImagePng = `${siteUrl}/og.png`
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -30,16 +29,10 @@ export const metadata: Metadata = {
     images: [
       {
         url: ogImageJpg,
+        secureUrl: ogImageJpg,
         width: 1200,
         height: 630,
         type: "image/jpeg",
-        alt: "Mika & Darshika",
-      },
-      {
-        url: ogImagePng,
-        width: 1200,
-        height: 630,
-        type: "image/png",
         alt: "Mika & Darshika",
       },
     ],
