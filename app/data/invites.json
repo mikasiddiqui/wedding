@@ -3,8 +3,7 @@
     "title": "William",
     "people": [
     {
-      "name": "William Wong",
-      "email": "mika@focia.io"
+      "name": "William Wong"
     }
     ]
   },
@@ -12,12 +11,10 @@
     "title": "Steph and Justin",
     "people": [
       {
-        "name": "Stephanie Lastname",
-        "email": ""
+        "name": "Stephanie Lastname"
       },
       {
-        "name": "Justin Lastname",
-        "email": ""
+        "name": "Justin Lastname"
       }
     ]
   },
@@ -25,12 +22,10 @@
     "title": "Richard and Yifan",
     "people": [
       {
-        "name": "Richard Li",
-        "email": ""
+        "name": "Richard Li"
       },
       {
-        "name": "Yifan Lastname",
-        "email": ""
+        "name": "Yifan Lastname"
 
       }
     ]
@@ -39,14 +34,10 @@
     "title": "Uday and Sashi",
     "people": [
       {
-        "name": "Uday Narain",
-        "email": "mikasiddiqui@gmail.com"
-
+        "name": "Uday Narain"
       },
       {
-        "name": "Sashi Narain",
-        "email": ""
-
+        "name": "Sashi Narain"
       }
     ]
   }

@@ -18,7 +18,7 @@ import {
 import invites from "@/app/data/invites.json"
 import { sangbleu } from "../app/fonts"
 
-type Person = { name: string; confirmed?: number | boolean }
+type Person = { name: string; confirmed?: number | boolean | string | null }
 type InviteRecord = { title?: string; people: Person[] }
 
 type FloatingRSVPProps = {
@@ -39,6 +39,21 @@ const buildApiHeaders = (token?: string, contentType?: string) => {
   if (contentType) headers["Content-Type"] = contentType
   if (token) headers["X-Invite-Token"] = token
   return headers
+}
+
+const normalizeConfirmed = (value: unknown): boolean | null => {
+  if (value === null || value === undefined) return null
+  if (typeof value === "string") {
+    const trimmed = value.trim()
+    if (!trimmed) return null
+    if (trimmed === "1") return true
+    if (trimmed === "0") return false
+    const num = Number(trimmed)
+    return Number.isNaN(num) ? Boolean(trimmed) : Boolean(num)
+  }
+  if (typeof value === "number") return value !== 0
+  if (typeof value === "boolean") return value
+  return Boolean(value)
 }
 
 const useRemoteInvite = (inviteId?: string): RemoteInviteState => {
@@ -95,7 +110,7 @@ export default function FloatingRSVP({
   const [submitting, setSubmitting] = useState(false)
   const [sent, setSent] = useState(false)
   const [selected, setSelected] = useState<Record<string, "attending" | "not">>({})
-  const [confirmed, setConfirmed] = useState<Record<string, boolean>>({})
+  const [confirmed, setConfirmed] = useState<Record<string, boolean | null>>({})
 
   const base = `${sangbleu.className} font-medium
     h-12 rounded-full px-12 text-lg tracking-widest transition-colors`
@@ -110,6 +125,7 @@ export default function FloatingRSVP({
     invite: remoteInvite,
     loading: remoteLoading,
     error: remoteError,
+    refresh: refreshRemoteInvite,
   } = useRemoteInvite(inviteId)
 
   const basePeople = useMemo<Person[]>(() => {
@@ -126,7 +142,9 @@ export default function FloatingRSVP({
     if (namesAreValid) return remoteInvite.people
     return basePeople.map((person, index) => ({
       name: person.name,
-      confirmed: remoteInvite.people[index]?.confirmed ?? person.confirmed,
+      confirmed: normalizeConfirmed(
+        remoteInvite.people[index]?.confirmed ?? person.confirmed ?? null
+      ),
     }))
   }, [remoteInvite, basePeople])
 
@@ -137,9 +155,9 @@ export default function FloatingRSVP({
   const remoteFetched = Boolean(apiUrl && remoteInvite && !remoteLoading && !remoteError)
 
   const initialConfirmed = useMemo(() => {
-    const next: Record<string, boolean> = {}
+    const next: Record<string, boolean | null> = {}
     people.forEach((person) => {
-      next[person.name] = Boolean(person.confirmed)
+      next[person.name] = normalizeConfirmed(person.confirmed)
     })
     return next
   }, [people])
@@ -171,11 +189,13 @@ export default function FloatingRSVP({
     if (!open) return
     const next: Record<string, "attending" | "not"> = {}
     people.forEach((person) => {
-      if (remoteFetched && !remoteNameSet.has(person.name)) {
+      const known = !remoteFetched || remoteNameSet.has(person.name)
+      const status = confirmed[person.name]
+      if (!known || status === null || status === undefined) {
         next[person.name] = "attending"
         return
       }
-      next[person.name] = confirmed[person.name] ? "attending" : "not"
+      next[person.name] = status ? "attending" : "not"
     })
     setSelected(next)
   }, [open, people, confirmed, remoteFetched, remoteNameSet])
@@ -186,9 +206,15 @@ export default function FloatingRSVP({
       setSent(false)
 
       if (apiUrl && inviteId) {
+        const postHeaders = apiToken
+          ? buildApiHeaders(apiToken, "text/plain;charset=UTF-8")
+          : { "Content-Type": "text/plain;charset=UTF-8" }
+        const postMode = apiToken ? "cors" : "no-cors"
+
         const apiResponse = await fetch(apiUrl, {
           method: "POST",
-          headers: buildApiHeaders(apiToken, "text/plain;charset=UTF-8"),
+          headers: postHeaders,
+          mode: postMode,
           body: JSON.stringify({
             inviteId,
             title: remoteInvite?.title ?? localInvite?.title ?? guestName,
@@ -199,16 +225,18 @@ export default function FloatingRSVP({
           }),
         })
 
-        const responseText = await apiResponse.text()
-        const apiJson = (() => {
-          try {
-            return JSON.parse(responseText)
-          } catch {
-            return null
+        if (apiResponse.type !== "opaque") {
+          const responseText = await apiResponse.text()
+          const apiJson = (() => {
+            try {
+              return JSON.parse(responseText)
+            } catch {
+              return null
+            }
+          })()
+          if (!apiResponse.ok || !apiJson || apiJson?.error) {
+            throw new Error(apiJson?.error || "RSVP update failed.")
           }
-        })()
-        if (!apiResponse.ok || !apiJson || apiJson?.error) {
-          throw new Error(apiJson?.error || "RSVP update failed.")
         }
       }
 
@@ -217,12 +245,12 @@ export default function FloatingRSVP({
         people.forEach((person) => {
           next[person.name] = selected[person.name] === "attending"
         })
-        if (!apiUrl) {
-          const storageKey = inviteId ? `rsvp-confirmed:${inviteId}` : null
-          if (storageKey && typeof window !== "undefined") {
-            try {
-              window.localStorage.setItem(storageKey, JSON.stringify(next))
-            } catch {
+      if (!apiUrl) {
+        const storageKey = inviteId ? `rsvp-confirmed:${inviteId}` : null
+        if (storageKey && typeof window !== "undefined") {
+          try {
+            window.localStorage.setItem(storageKey, JSON.stringify(next))
+          } catch {
               // ignore storage errors
             }
           }
@@ -231,9 +259,18 @@ export default function FloatingRSVP({
       })
       setSent(true)
       setOpen(false)
+      if (apiUrl) {
+        setTimeout(() => {
+          refreshRemoteInvite()
+        }, 800)
+      }
       setTimeout(() => setSent(false), 2000)
     } catch (e) {
-      alert("Couldn’t send RSVP. Please try again.")
+      const message =
+        e instanceof Error && e.message
+          ? e.message
+          : "Couldn’t send RSVP. Please try again."
+      alert(message)
       console.error(e)
     } finally {
       setSubmitting(false)
@@ -282,7 +319,7 @@ export default function FloatingRSVP({
                   <>
                     {remoteError && (
                       <div className="text-sm text-white/70">
-                        Couldn’t load the latest RSVP status. Showing local data.
+                        Could not load the latest RSVP status. Showing local data.
                       </div>
                     )}
                     {people.map((person, index) => (
@@ -294,14 +331,20 @@ export default function FloatingRSVP({
                         <Badge
                           variant="outline"
                           className={
-                            remoteFetched && !remoteNameSet.has(person.name)
+                            remoteFetched &&
+                            (!remoteNameSet.has(person.name) ||
+                              confirmed[person.name] === null ||
+                              confirmed[person.name] === undefined)
                               ? "border-white/30 text-white/70"
                               : confirmed[person.name]
                               ? "border-white/60 bg-white text-rose-900"
                               : "border-white/30 text-white/70"
                           }
                         >
-                          {remoteFetched && !remoteNameSet.has(person.name)
+                          {remoteFetched &&
+                          (!remoteNameSet.has(person.name) ||
+                            confirmed[person.name] === null ||
+                            confirmed[person.name] === undefined)
                             ? "Not confirmed"
                             : confirmed[person.name]
                             ? "Attending"
