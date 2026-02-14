@@ -5,7 +5,7 @@ import RoseBackground from "@/components/RoseBackground"
 import Header from "@/components/Header"
 
 const siteUrl = "https://mikadarshika.com"
-const ogImageJpg = `${siteUrl}/og.jpg`
+const ogImageJpg = `${siteUrl}/og-social.jpg`
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -53,6 +53,15 @@ export const metadata: Metadata = {
   robots: {
     index: false,
     follow: false,
+    nocache: true,
+    googleBot: {
+      index: false,
+      follow: false,
+      noimageindex: true,
+    },
+  },
+  other: {
+    bingbot: "noindex, nofollow",
   },
 }
 
