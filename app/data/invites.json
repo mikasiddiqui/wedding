@@ -1,12 +1,23 @@
 {
+  "william": {
+    "title": "William",
+    "people": [
+    {
+      "name": "William Wong",
+      "email": "mika@focia.io"
+    }
+    ]
+  },
   "steph-justin": {
     "title": "Steph and Justin",
     "people": [
       {
-        "name": "Stephanie Lastname"
+        "name": "Stephanie Lastname",
+        "email": ""
       },
       {
-        "name": "Justin Lastname"
+        "name": "Justin Lastname",
+        "email": ""
       }
     ]
   },
@@ -14,10 +25,13 @@
     "title": "Richard and Yifan",
     "people": [
       {
-        "name": "Richard Li"
+        "name": "Richard Li",
+        "email": ""
       },
       {
-        "name": "Yifan Lastname"
+        "name": "Yifan Lastname",
+        "email": ""
+
       }
     ]
   },
@@ -25,10 +39,14 @@
     "title": "Uday and Sashi",
     "people": [
       {
-        "name": "Uday Narain"
+        "name": "Uday Narain",
+        "email": "mikasiddiqui@gmail.com"
+
       },
       {
-        "name": "Sashi Narain"
+        "name": "Sashi Narain",
+        "email": ""
+
       }
     ]
   }
