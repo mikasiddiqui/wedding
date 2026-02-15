@@ -297,11 +297,11 @@ export default function FloatingRSVP({
             </DialogHeader>
 
             <div className="mt-4 rounded-[16px] border border-white/20 bg-white/5 px-4 py-4">
-              <div className="grid grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-4 border-b border-white/10 pb-3">
+              <div className="grid grid-cols-[minmax(0,1.25fr)_minmax(0,0.7fr)_minmax(0,1fr)] items-center gap-2 border-b border-white/10 pb-3 sm:grid-cols-[minmax(0,1fr)_auto_auto] sm:gap-4">
                 <div className="text-sm uppercase tracking-[0.2em] text-white/80">
                   Guests
                 </div>
-                <div className="text-sm uppercase tracking-[0.2em] text-white/80">
+                <div className="text-sm uppercase tracking-[0.2em] text-white/80 justify-self-center">
                   Status
                 </div>
                 <div className="text-sm uppercase tracking-[0.2em] text-white/80">
@@ -318,68 +318,83 @@ export default function FloatingRSVP({
                         Could not load the latest RSVP status. Showing local data.
                       </div>
                     )}
-                    {people.map((person, index) => (
-                      <div
-                        key={`${person.name}-${index}`}
-                        className="grid grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-4 text-[clamp(1rem,2.3vw,1rem)]"
-                      >
-                        <span>{person.name}</span>
-                        <Badge
-                          variant="outline"
-                          className={
-                            remoteFetched &&
-                            (!remoteNameSet.has(person.name) ||
-                              confirmed[person.name] === null ||
-                              confirmed[person.name] === undefined)
-                              ? "border-white/30 text-white/70"
-                              : confirmed[person.name]
-                              ? "border-white/60 bg-white text-rose-900"
-                              : "border-white/30 text-white/70"
-                          }
+                    {people.map((person, index) => {
+                      const isNotConfirmed =
+                        remoteFetched &&
+                        (!remoteNameSet.has(person.name) ||
+                          confirmed[person.name] === null ||
+                          confirmed[person.name] === undefined)
+                      const isAttending = Boolean(confirmed[person.name])
+                      const statusLabel = isNotConfirmed
+                        ? "Not confirmed"
+                        : isAttending
+                        ? "Attending"
+                        : "Not attending"
+
+                      return (
+                        <div
+                          key={`${person.name}-${index}`}
+                          className="grid grid-cols-[minmax(0,1.25fr)_minmax(0,0.7fr)_minmax(0,1fr)] items-center gap-2 text-[clamp(1rem,2.3vw,1rem)] sm:grid-cols-[minmax(0,1fr)_auto_auto] sm:gap-4"
                         >
-                          {remoteFetched &&
-                          (!remoteNameSet.has(person.name) ||
-                            confirmed[person.name] === null ||
-                            confirmed[person.name] === undefined)
-                            ? "Not confirmed"
-                            : confirmed[person.name]
-                            ? "Attending"
-                            : "Not attending"}
-                        </Badge>
-                        <RadioGroup
-                          value={selected[person.name]}
-                          onValueChange={(value) =>
-                            setSelected((prev) => ({
-                              ...prev,
-                              [person.name]: value as "attending" | "not",
-                            }))
-                          }
-                          disabled={remoteLoading}
-                          className="flex items-center gap-6"
-                        >
-                          <div className="flex items-center gap-2">
-                            <RadioGroupItem
-                              value="attending"
-                              id={`${person.name}-attending`}
-                              className="border-white text-rose-900 data-[state=checked]:border-white data-[state=checked]:bg-white"
-                            />
-                            <Label htmlFor={`${person.name}-attending`} className="text-white/90">
-                              Yes
-                            </Label>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <RadioGroupItem
-                              value="not"
-                              id={`${person.name}-not`}
-                              className="border-white text-rose-900 data-[state=checked]:border-white data-[state=checked]:bg-white"
-                            />
-                            <Label htmlFor={`${person.name}-not`} className="text-white/90">
-                              No
-                            </Label>
-                          </div>
-                        </RadioGroup>
-                      </div>
-                    ))}
+                          <span>{person.name}</span>
+                          <span
+                            aria-label={statusLabel}
+                            title={statusLabel}
+                            className={`h-2.5 w-2.5 justify-self-center rounded-full sm:hidden ${
+                              isNotConfirmed
+                                ? "border border-white/60 bg-transparent"
+                                : isAttending
+                                ? "bg-green-500"
+                                : "bg-red-500"
+                            }`}
+                          />
+                          <Badge
+                            variant="outline"
+                            className={`hidden sm:inline-flex ${
+                              isNotConfirmed
+                                ? "border-white/30 text-white/70"
+                                : isAttending
+                                ? "border-white/60 bg-white text-rose-900"
+                                : "border-white/30 text-white/70"
+                            }`}
+                          >
+                            {statusLabel}
+                          </Badge>
+                          <RadioGroup
+                            value={selected[person.name]}
+                            onValueChange={(value) =>
+                              setSelected((prev) => ({
+                                ...prev,
+                                [person.name]: value as "attending" | "not",
+                              }))
+                            }
+                            disabled={remoteLoading}
+                            className="flex items-center gap-4 sm:gap-6"
+                          >
+                            <div className="flex items-center gap-2">
+                              <RadioGroupItem
+                                value="attending"
+                                id={`${person.name}-attending`}
+                                className="border-white text-rose-900 data-[state=checked]:border-white data-[state=checked]:bg-white"
+                              />
+                              <Label htmlFor={`${person.name}-attending`} className="text-white/90">
+                                Yes
+                              </Label>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <RadioGroupItem
+                                value="not"
+                                id={`${person.name}-not`}
+                                className="border-white text-rose-900 data-[state=checked]:border-white data-[state=checked]:bg-white"
+                              />
+                              <Label htmlFor={`${person.name}-not`} className="text-white/90">
+                                No
+                              </Label>
+                            </div>
+                          </RadioGroup>
+                        </div>
+                      )
+                    })}
                   </>
                 )}
               </div>
