@@ -441,7 +441,7 @@ export default function Home() {
                     <AccordionContent
                       className={`${sangbleu.className} text-white/90 text-[clamp(0.95rem,2.2vw,1.3rem)] leading-relaxed`}
                     >
-                      As the wedding will be held at the Narain family home, there will
+                      As the wedding will be held at the Narayan family home, there will
                       only be on street parking available. We recommend you to carpool
                       with other guests where possible.
                     </AccordionContent>
