@@ -91,7 +91,7 @@ export default function Header() {
                 </div>
               </div>
 
-              <div className="px-12 pt-24">
+              <div className="px-12 pt-14 sm:pt-24">
                 <nav className="space-y-10 text-[clamp(3.5rem,8vw,6rem)] text-rose-900 leading-none">
                   <DialogClose asChild>
                     <a href="#invitation" className="block">INVITATION</a>

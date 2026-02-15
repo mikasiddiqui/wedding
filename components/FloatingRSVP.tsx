@@ -108,6 +108,8 @@ export default function FloatingRSVP({
   const [open, setOpen] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [sent, setSent] = useState(false)
+  const [faqExpanded, setFaqExpanded] = useState(false)
+  const [faqInView, setFaqInView] = useState(false)
   const [selected, setSelected] = useState<Record<string, "attending" | "not">>({})
   const [confirmed, setConfirmed] = useState<Record<string, boolean | null>>({})
 
@@ -196,6 +198,55 @@ export default function FloatingRSVP({
     setSelected(next)
   }, [open, people, confirmed, remoteFetched, remoteNameSet])
 
+  useEffect(() => {
+    if (typeof window === "undefined") return
+
+    const faqEl = document.getElementById("faq")
+    if (!faqEl) return
+
+    const updateFaqExpanded = () => {
+      const hasOpenItem = Boolean(
+        faqEl.querySelector('[data-slot="accordion-item"][data-state="open"]')
+      )
+      setFaqExpanded(hasOpenItem)
+    }
+
+    updateFaqExpanded()
+
+    const observer = new MutationObserver(updateFaqExpanded)
+    observer.observe(faqEl, {
+      subtree: true,
+      childList: true,
+      attributes: true,
+      attributeFilter: ["data-state"],
+    })
+
+    return () => observer.disconnect()
+  }, [])
+
+  useEffect(() => {
+    if (typeof window === "undefined") return
+
+    const faqEl = document.getElementById("faq")
+    const mainEl = document.querySelector("main")
+    if (!faqEl || !mainEl) return
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setFaqInView(entry.isIntersecting && entry.intersectionRatio >= 0.25)
+      },
+      {
+        root: mainEl,
+        threshold: [0, 0.25, 0.5],
+      }
+    )
+
+    observer.observe(faqEl)
+    return () => observer.disconnect()
+  }, [])
+
+  const shouldMuteRsvp = faqExpanded && faqInView
+
   const handleConfirm = async () => {
     try {
       setSubmitting(true)
@@ -275,7 +326,11 @@ export default function FloatingRSVP({
 
   return (
     <div className="fixed inset-x-0 bottom-16 md:bottom-20 z-[200] flex justify-center pointer-events-none">
-      <div className="pointer-events-auto">
+      <div
+        className={`pointer-events-auto transition-opacity duration-300 ${
+          shouldMuteRsvp ? "opacity-35 pointer-events-none" : "opacity-100"
+        }`}
+      >
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
             <Button
@@ -297,14 +352,14 @@ export default function FloatingRSVP({
             </DialogHeader>
 
             <div className="mt-4 rounded-[16px] border border-white/20 bg-white/5 px-4 py-4">
-              <div className="grid grid-cols-[minmax(0,1.25fr)_minmax(0,0.7fr)_minmax(0,1fr)] items-center gap-2 border-b border-white/10 pb-3 sm:grid-cols-[minmax(0,1fr)_auto_auto] sm:gap-4">
-                <div className="text-sm uppercase tracking-[0.2em] text-white/80">
+              <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,8.5rem)] items-center gap-2 border-b border-white/10 pb-3 sm:grid-cols-[minmax(0,1fr)_auto_auto] sm:gap-4">
+                <div className="text-[0.72rem] uppercase tracking-[0.14em] text-white/80 sm:text-sm sm:tracking-[0.2em]">
                   Guests
                 </div>
-                <div className="text-sm uppercase tracking-[0.2em] text-white/80 justify-self-center">
+                <div className="hidden justify-self-center text-[0.72rem] uppercase tracking-[0.14em] text-white/80 sm:block sm:text-sm sm:tracking-[0.2em]">
                   Status
                 </div>
-                <div className="text-sm uppercase tracking-[0.2em] text-white/80">
+                <div className="text-[0.72rem] uppercase tracking-[0.14em] text-white/80 sm:text-sm sm:tracking-[0.2em]">
                   Attending
                 </div>
               </div>
@@ -334,20 +389,9 @@ export default function FloatingRSVP({
                       return (
                         <div
                           key={`${person.name}-${index}`}
-                          className="grid grid-cols-[minmax(0,1.25fr)_minmax(0,0.7fr)_minmax(0,1fr)] items-center gap-2 text-[clamp(1rem,2.3vw,1rem)] sm:grid-cols-[minmax(0,1fr)_auto_auto] sm:gap-4"
+                          className="grid grid-cols-[minmax(0,1fr)_minmax(0,8.5rem)] items-center gap-2 text-[0.95rem] sm:grid-cols-[minmax(0,1fr)_auto_auto] sm:gap-4 sm:text-[clamp(1rem,2.3vw,1rem)]"
                         >
-                          <span>{person.name}</span>
-                          <span
-                            aria-label={statusLabel}
-                            title={statusLabel}
-                            className={`h-2.5 w-2.5 justify-self-center rounded-full sm:hidden ${
-                              isNotConfirmed
-                                ? "border border-white/60 bg-transparent"
-                                : isAttending
-                                ? "bg-green-500"
-                                : "bg-red-500"
-                            }`}
-                          />
+                          <span className="min-w-0 break-words pr-1 leading-tight">{person.name}</span>
                           <Badge
                             variant="outline"
                             className={`hidden sm:inline-flex ${
@@ -369,25 +413,25 @@ export default function FloatingRSVP({
                               }))
                             }
                             disabled={remoteLoading}
-                            className="flex items-center gap-4 sm:gap-6"
+                            className="flex min-w-0 items-center gap-3 sm:gap-6"
                           >
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-1.5">
                               <RadioGroupItem
                                 value="attending"
                                 id={`${person.name}-attending`}
                                 className="border-white text-rose-900 data-[state=checked]:border-white data-[state=checked]:bg-white"
                               />
-                              <Label htmlFor={`${person.name}-attending`} className="text-white/90">
+                              <Label htmlFor={`${person.name}-attending`} className="text-[0.95rem] text-white/90 sm:text-base">
                                 Yes
                               </Label>
                             </div>
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-1.5">
                               <RadioGroupItem
                                 value="not"
                                 id={`${person.name}-not`}
                                 className="border-white text-rose-900 data-[state=checked]:border-white data-[state=checked]:bg-white"
                               />
-                              <Label htmlFor={`${person.name}-not`} className="text-white/90">
+                              <Label htmlFor={`${person.name}-not`} className="text-[0.95rem] text-white/90 sm:text-base">
                                 No
                               </Label>
                             </div>

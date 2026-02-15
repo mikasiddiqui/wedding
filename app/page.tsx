@@ -142,9 +142,11 @@ export default function Home() {
           <div
             className={`
               relative z-10
-              text-[clamp(5.6rem,17vw,10.5rem)]
+              text-[clamp(4.4rem,15vw,10.5rem)]
+              sm:text-[clamp(5.6rem,17vw,10.5rem)]
               tracking-tight
-              translate-x-[-0.75rem]
+              translate-x-0
+              sm:translate-x-[-0.75rem]
               ${revealBase} ${heroInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"} delay-[640ms]
             `}
           >
@@ -169,10 +171,13 @@ export default function Home() {
           {/* Darshika */}
           <div
             className={`
-              relative z-10 mt-[-1.6rem]
-              text-[clamp(5.6rem,17vw,10.5rem)]
+              relative z-10 mt-[-1rem]
+              sm:mt-[-1.6rem]
+              text-[clamp(4.4rem,15vw,10.5rem)]
+              sm:text-[clamp(5.6rem,17vw,10.5rem)]
               tracking-tight
-              translate-x-[0.75rem]
+              translate-x-0
+              sm:translate-x-[0.75rem]
               ${revealBase} ${heroInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"} delay-[1280ms]
             `}
           >
@@ -294,11 +299,11 @@ export default function Home() {
         id="schedule"
         className="relative h-[100dvh] snap-start [scroll-snap-stop:always] [content-visibility:auto] [contain-intrinsic-size:100dvh]"
       >
-        <div className="grid h-full place-items-center pt-[96px] pb-[18rem] md:pb-[12rem] box-border">
+        <div className="grid h-full place-items-center pt-[96px] pb-[calc(19rem+env(safe-area-inset-bottom))] sm:pb-[18rem] md:pb-[12rem] box-border">
           <div className="w-full max-w-[min(92vw,84rem)] px-4">
             <div
               className="
-                grid gap-8
+                grid gap-6 sm:gap-8
                 p-2
                 md:grid-cols-[1fr_1.05fr]
                 md:items-center
@@ -311,7 +316,8 @@ export default function Home() {
                   <div
                     className={`
                       ${sangbleu.className}
-                      text-[clamp(2.2rem,6vw,4.4rem)]
+                      text-[clamp(2rem,5.6vw,4.4rem)]
+                      sm:text-[clamp(2.2rem,6vw,4.4rem)]
                       tracking-tight
                       text-white
                       ${revealBase} ${scheduleInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"} delay-[800ms]
@@ -322,8 +328,9 @@ export default function Home() {
                   <div
                     className={`
                       ${sangbleu.className}
-                      mt-4
-                      text-[clamp(1.05rem,2.4vw,1.6rem)]
+                      mt-3 sm:mt-4
+                      text-[clamp(0.98rem,2.25vw,1.6rem)]
+                      sm:text-[clamp(1.05rem,2.4vw,1.6rem)]
                       leading-relaxed
                       text-white/90
                       ${revealBase} ${scheduleInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"} delay-[1120ms]
@@ -336,7 +343,7 @@ export default function Home() {
               <div
                 className={`
                   ${revealBase} ${scheduleInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"} delay-[400ms]
-                  relative w-full max-w-[14rem] sm:max-w-[22rem] md:max-w-[430px] lg:max-w-[480px] mx-auto overflow-hidden rounded-[20px]
+                  relative w-full max-w-[12.75rem] sm:max-w-[22rem] md:max-w-[430px] lg:max-w-[480px] mx-auto overflow-hidden rounded-[20px]
                 `}
               >
                 <div className="aspect-[4/5] md:aspect-[3/4]">
@@ -362,7 +369,7 @@ export default function Home() {
       >
         <div className="grid h-full place-items-center pt-[96px] pb-[14rem] md:pb-[12rem] box-border">
           <div className="w-full max-w-[min(92vw,84rem)] px-4">
-            <div className="mt-8 grid gap-8 md:grid-cols-[0.8fr_1.2fr] md:items-start">
+            <div className="mt-4 grid gap-8 sm:mt-8 md:grid-cols-[0.8fr_1.2fr] md:items-start">
               <div
                 className={`
                   ${revealBase} ${faqInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"} delay-[640ms]
@@ -396,7 +403,7 @@ export default function Home() {
                 <div
                   className={`
                     ${revealBase} ${faqInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"} delay-[960ms]
-                    mt-6
+                    mt-4 sm:mt-6
                     rounded-[24px]
                     bg-white/5
                     px-6 py-6
@@ -407,12 +414,12 @@ export default function Home() {
                 <Accordion type="single" collapsible>
                   <AccordionItem value="item-1" className="border-white/20">
                     <AccordionTrigger
-                      className={`${sangbleu.className} text-white text-[clamp(1.1rem,2.6vw,1.6rem)]`}
+                      className={`${sangbleu.className} text-white text-[clamp(0.98rem,2.4vw,1.6rem)] sm:text-[clamp(1.1rem,2.6vw,1.6rem)]`}
                     >
                       How will I know which address to go to on the day?
                     </AccordionTrigger>
                     <AccordionContent
-                      className={`${sangbleu.className} text-white/90 text-[clamp(0.95rem,2.2vw,1.3rem)] leading-relaxed`}
+                      className={`${sangbleu.className} text-white/90 text-[clamp(0.9rem,2vw,1.3rem)] sm:text-[clamp(0.95rem,2.2vw,1.3rem)] leading-relaxed`}
                     >
                       For privacy reasons, we will be posting the address of the location
                       closer to the date of the wedding date.
@@ -420,12 +427,12 @@ export default function Home() {
                   </AccordionItem>
                   <AccordionItem value="item-2" className="border-white/20">
                     <AccordionTrigger
-                      className={`${sangbleu.className} text-white text-[clamp(1.1rem,2.6vw,1.6rem)]`}
+                      className={`${sangbleu.className} text-white text-[clamp(0.98rem,2.4vw,1.6rem)] sm:text-[clamp(1.1rem,2.6vw,1.6rem)]`}
                     >
                       What is the dress code?
                     </AccordionTrigger>
                     <AccordionContent
-                      className={`${sangbleu.className} text-white/90 text-[clamp(0.95rem,2.2vw,1.3rem)] leading-relaxed`}
+                      className={`${sangbleu.className} text-white/90 text-[clamp(0.9rem,2vw,1.3rem)] sm:text-[clamp(0.95rem,2.2vw,1.3rem)] leading-relaxed`}
                     >
                       The dress code is formal wear and we encourage you to wear your
                       traditional cultural outfits. We recommend that you do not wear
@@ -434,12 +441,12 @@ export default function Home() {
                   </AccordionItem>
                   <AccordionItem value="item-3" className="border-white/20">
                     <AccordionTrigger
-                      className={`${sangbleu.className} text-white text-[clamp(1.1rem,2.6vw,1.6rem)]`}
+                      className={`${sangbleu.className} text-white text-[clamp(0.98rem,2.4vw,1.6rem)] sm:text-[clamp(1.1rem,2.6vw,1.6rem)]`}
                     >
                       Is there parking available?
                     </AccordionTrigger>
                     <AccordionContent
-                      className={`${sangbleu.className} text-white/90 text-[clamp(0.95rem,2.2vw,1.3rem)] leading-relaxed`}
+                      className={`${sangbleu.className} text-white/90 text-[clamp(0.9rem,2vw,1.3rem)] sm:text-[clamp(0.95rem,2.2vw,1.3rem)] leading-relaxed`}
                     >
                       As the wedding will be held at the Narayan family home, there will
                       only be on street parking available. We recommend you to carpool
@@ -448,12 +455,12 @@ export default function Home() {
                   </AccordionItem>
                   <AccordionItem value="item-4" className="border-white/20">
                     <AccordionTrigger
-                      className={`${sangbleu.className} text-white text-[clamp(1.1rem,2.6vw,1.6rem)]`}
+                      className={`${sangbleu.className} text-white text-[clamp(0.98rem,2.4vw,1.6rem)] sm:text-[clamp(1.1rem,2.6vw,1.6rem)]`}
                     >
                       How will you cater for my dietary requirements?
                     </AccordionTrigger>
                     <AccordionContent
-                      className={`${sangbleu.className} text-white/90 text-[clamp(0.95rem,2.2vw,1.3rem)] leading-relaxed`}
+                      className={`${sangbleu.className} text-white/90 text-[clamp(0.9rem,2vw,1.3rem)] sm:text-[clamp(0.95rem,2.2vw,1.3rem)] leading-relaxed`}
                     >
                       All of the food served will be vegetarian. Unfortunately, we will
                       not be able to cater for specific dietary requirements or allergies
