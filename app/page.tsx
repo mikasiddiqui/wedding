@@ -9,6 +9,7 @@ import {
   DialogClose,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
@@ -31,13 +32,15 @@ function useInViewOnce(
   targetRef: RefObject<HTMLElement | null>,
   rootRef: RefObject<HTMLElement | null>,
   threshold = 0.6,
-  defaultInView = false
+  defaultInView = false,
+  enabled = true
 ) {
   const [inView, setInView] = useState(defaultInView)
   const hasIntersectionObserver =
     typeof window === "undefined" || "IntersectionObserver" in window
 
   useEffect(() => {
+    if (!enabled) return
     if (!hasIntersectionObserver) return
 
     const target = targetRef.current
@@ -58,7 +61,7 @@ function useInViewOnce(
 
     observer.observe(target)
     return () => observer.disconnect()
-  }, [targetRef, rootRef, threshold, hasIntersectionObserver])
+  }, [targetRef, rootRef, threshold, hasIntersectionObserver, enabled])
 
   return hasIntersectionObserver ? inView : true
 }
@@ -76,12 +79,14 @@ export default function Home() {
     guestTitle,
     rsvpClosed,
   } = useInviteAccess()
+  const guestName = guestTitle ?? null
+  const showHeroOnly = !inviteId || rsvpClosed
 
   const heroInView = useInViewOnce(heroRef, mainRef, 0.6)
-  const inviteInView = useInViewOnce(inviteRef, mainRef, 0.6)
-  const scheduleInView = useInViewOnce(scheduleRef, mainRef, 0.6)
-  const faqInView = useInViewOnce(faqRef, mainRef, 0.6)
-  const galleryInView = useInViewOnce(galleryRef, mainRef, 0.6)
+  const inviteInView = useInViewOnce(inviteRef, mainRef, 0.6, false, !showHeroOnly)
+  const scheduleInView = useInViewOnce(scheduleRef, mainRef, 0.6, false, !showHeroOnly)
+  const faqInView = useInViewOnce(faqRef, mainRef, 0.6, false, !showHeroOnly)
+  const galleryInView = useInViewOnce(galleryRef, mainRef, 0.6, false, !showHeroOnly)
 
   const galleryImages = Array.from({ length: 11 }, (_, index) => {
     return `/images/gallery/${index + 1}.jpg`
@@ -89,8 +94,6 @@ export default function Home() {
 
   const revealBase =
     "transition-[opacity,transform] duration-[1760ms] ease-out will-change-transform"
-  const guestName = guestTitle ?? null
-  const showHeroOnly = !inviteId || rsvpClosed
   const closedNoticeOpen = Boolean(
     rsvpClosed && inviteId && dismissedClosedInviteId !== inviteId
   )
@@ -183,28 +186,30 @@ export default function Home() {
           if (!open && inviteId) setDismissedClosedInviteId(inviteId)
         }}
       >
-        <DialogContent className="max-w-[min(92vw,32rem)] rounded-[24px] border-white/30 bg-rose-50 text-rose-950 shadow-xl">
+        <DialogContent className="border-white/20 bg-[#c98f96] text-white">
           <DialogHeader>
-            <DialogTitle className={`${sangbleu.className} text-2xl text-rose-950`}>
+            <DialogTitle className={`${sangbleu.className} text-[clamp(1.6rem,3vw,2.2rem)] tracking-tight`}>
               Online RSVP Has Closed
             </DialogTitle>
-            <DialogDescription className="text-sm leading-relaxed text-rose-900/80">
+            <DialogDescription
+              className={`${sangbleu.className} text-[clamp(1rem,2.1vw,1.2rem)] leading-relaxed text-white/80`}
+            >
               Thank you for checking in with us. Online RSVPs for this invitation are now
-              closed. If you need to confirm or update your attendance, please email{" "}
-              <a className="underline underline-offset-4" href="mailto:wedding@mikadarshika.com">
-                wedding@mikadarshika.com
-              </a>{" "}
-              and Mika &amp; Darshika will help directly.
+              closed. If you need to confirm or update your attendance, please message Mika
+              &amp; Darshika directly.
             </DialogDescription>
           </DialogHeader>
-          <DialogClose asChild>
-            <Button
-              type="button"
-              className="mt-2 w-full rounded-full bg-rose-900 text-rose-50 hover:bg-rose-950"
-            >
-              Close
-            </Button>
-          </DialogClose>
+          <DialogFooter className="mt-4 sm:justify-end">
+            <DialogClose asChild>
+              <Button
+                variant="default"
+                type="button"
+                className={`${sangbleu.className} bg-white/90 text-black/80 hover:bg-white`}
+              >
+                Close
+              </Button>
+            </DialogClose>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
 
