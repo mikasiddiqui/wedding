@@ -59,7 +59,7 @@ const useRemoteInvite = (inviteId?: string): RemoteInviteState => {
   const apiUrl = process.env.NEXT_PUBLIC_RSVP_API_URL
   const apiToken = process.env.NEXT_PUBLIC_RSVP_API_TOKEN
   const [invite, setInvite] = useState<InviteRecord | null>(null)
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(Boolean(apiUrl && inviteId))
   const [error, setError] = useState<string | null>(null)
 
   const refresh = useCallback(() => {
@@ -91,11 +91,31 @@ const useRemoteInvite = (inviteId?: string): RemoteInviteState => {
   }, [apiUrl, inviteId, apiToken])
 
   useEffect(() => {
-    const cleanup = refresh()
+    if (!apiUrl || !inviteId) return
+
+    let active = true
+    fetch(`${apiUrl}?inviteId=${encodeURIComponent(inviteId)}`, {
+      method: "GET",
+      headers: buildApiHeaders(apiToken),
+    })
+      .then(async (res) => {
+        if (!res.ok) throw new Error("Failed to load RSVP data.")
+        return (await res.json()) as InviteRecord
+      })
+      .then((data) => {
+        if (active) setInvite(data)
+      })
+      .catch((err) => {
+        if (active) setError(err.message || "Unable to load RSVP data.")
+      })
+      .finally(() => {
+        if (active) setLoading(false)
+      })
+
     return () => {
-      if (typeof cleanup === "function") cleanup()
+      active = false
     }
-  }, [refresh])
+  }, [apiUrl, inviteId, apiToken])
 
   return { invite, loading, error, refresh }
 }

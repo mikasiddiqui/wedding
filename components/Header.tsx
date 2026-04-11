@@ -1,6 +1,5 @@
 "use client"
 
-import { useEffect, useState } from "react"
 import {
   Dialog,
   DialogTrigger,
@@ -10,50 +9,18 @@ import {
 } from "@/components/ui/dialog"
 import { Menu, X } from "lucide-react"
 import FloatingRSVP from "@/components/FloatingRSVP"
-
+import { useInviteAccess } from "@/lib/use-invite-access"
 
 export default function Header() {
-  const [open, setOpen] = useState(false)
-  const [inviteId, setInviteId] = useState<string | undefined>(undefined)
-  const [guestTitle, setGuestTitle] = useState<string | undefined>(undefined)
-  const apiUrl = process.env.NEXT_PUBLIC_RSVP_API_URL
+  const {
+    inviteId,
+    guestTitle,
+    rsvpClosed,
+  } = useInviteAccess()
 
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search)
-    const id = params.get("invite") ?? undefined
-    if (!id || !apiUrl) {
-      setInviteId(undefined)
-      setGuestTitle(undefined)
-      return
-    }
-
-    let active = true
-    fetch(`${apiUrl}?inviteId=${encodeURIComponent(id)}`)
-      .then(async (res) => {
-        if (!res.ok) return null
-        return (await res.json()) as { title?: string; people?: unknown[] }
-      })
-      .then((data) => {
-        if (!active) return
-        const people = Array.isArray(data?.people) ? data.people : []
-        if (people.length === 0) {
-          setInviteId(undefined)
-          setGuestTitle(undefined)
-          return
-        }
-        setInviteId(id)
-        setGuestTitle(typeof data?.title === "string" ? data.title : undefined)
-      })
-      .catch(() => {
-        if (!active) return
-        setInviteId(undefined)
-        setGuestTitle(undefined)
-      })
-
-    return () => {
-      active = false
-    }
-  }, [apiUrl])
+  if (!inviteId || rsvpClosed) {
+    return null
+  }
 
   return (
     <>
@@ -65,7 +32,7 @@ export default function Header() {
         </div>
 
         <div className="flex justify-end">
-          <Dialog onOpenChange={setOpen}>
+          <Dialog>
             <DialogTrigger asChild>
               <button className="flex h-12 w-12 items-center justify-center">
                 <Menu className="h-10 w-10 stroke-[1.5]" />
@@ -113,9 +80,9 @@ export default function Header() {
       </header>
 
       {/* Floating CTA lives with the state that controls it */}
-{inviteId ? (
-  <FloatingRSVP dialogOpen={false} inviteId={inviteId} guestName={guestTitle} />
-) : null}
+      {inviteId ? (
+        <FloatingRSVP dialogOpen={false} inviteId={inviteId} guestName={guestTitle} />
+      ) : null}
     </>
   )
 }

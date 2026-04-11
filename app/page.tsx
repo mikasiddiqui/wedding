@@ -3,6 +3,15 @@
 import { useEffect, useRef, useState } from "react"
 import type { RefObject } from "react"
 import { sangbleu } from "./fonts"
+import { Button } from "@/components/ui/button"
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 import {
   Accordion,
   AccordionContent,
@@ -16,6 +25,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel"
+import { useInviteAccess } from "@/lib/use-invite-access"
 
 function useInViewOnce(
   targetRef: RefObject<HTMLElement | null>,
@@ -24,12 +34,11 @@ function useInViewOnce(
   defaultInView = false
 ) {
   const [inView, setInView] = useState(defaultInView)
+  const hasIntersectionObserver =
+    typeof window === "undefined" || "IntersectionObserver" in window
 
   useEffect(() => {
-    if (typeof window === "undefined" || !("IntersectionObserver" in window)) {
-      setInView(true)
-      return
-    }
+    if (!hasIntersectionObserver) return
 
     const target = targetRef.current
     if (!target) return
@@ -49,19 +58,24 @@ function useInViewOnce(
 
     observer.observe(target)
     return () => observer.disconnect()
-  }, [targetRef, rootRef, threshold])
+  }, [targetRef, rootRef, threshold, hasIntersectionObserver])
 
-  return inView
+  return hasIntersectionObserver ? inView : true
 }
 
 export default function Home() {
-  const [guestName, setGuestName] = useState<string | null>(null)
   const mainRef = useRef<HTMLElement | null>(null)
   const heroRef = useRef<HTMLDivElement | null>(null)
   const inviteRef = useRef<HTMLDivElement | null>(null)
   const scheduleRef = useRef<HTMLDivElement | null>(null)
   const faqRef = useRef<HTMLDivElement | null>(null)
   const galleryRef = useRef<HTMLDivElement | null>(null)
+  const [dismissedClosedInviteId, setDismissedClosedInviteId] = useState<string | null>(null)
+  const {
+    inviteId,
+    guestTitle,
+    rsvpClosed,
+  } = useInviteAccess()
 
   const heroInView = useInViewOnce(heroRef, mainRef, 0.6)
   const inviteInView = useInViewOnce(inviteRef, mainRef, 0.6)
@@ -75,43 +89,18 @@ export default function Home() {
 
   const revealBase =
     "transition-[opacity,transform] duration-[1760ms] ease-out will-change-transform"
-
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search)
-    const inviteId = params.get("invite")
-
-    if (!inviteId) return
-
-    const apiUrl = process.env.NEXT_PUBLIC_RSVP_API_URL
-    if (!apiUrl) return
-
-    const controller = new AbortController()
-
-    const loadGuestName = async () => {
-      try {
-        const response = await fetch(
-          `${apiUrl}?inviteId=${encodeURIComponent(inviteId)}`,
-          { signal: controller.signal }
-        )
-        if (!response.ok) return
-        const data = await response.json()
-        const title = typeof data?.title === "string" ? data.title : ""
-        setGuestName(title ? title : null)
-      } catch (error) {
-        if ((error as Error).name !== "AbortError") {
-          setGuestName(null)
-        }
-      }
-    }
-
-    loadGuestName()
-    return () => controller.abort()
-  }, [])
+  const guestName = guestTitle ?? null
+  const showHeroOnly = !inviteId || rsvpClosed
+  const closedNoticeOpen = Boolean(
+    rsvpClosed && inviteId && dismissedClosedInviteId !== inviteId
+  )
 
   return (
     <main
       ref={mainRef}
-      className="relative h-[100dvh] overflow-y-auto snap-y snap-mandatory px-6"
+      className={`relative h-[100dvh] px-6 ${
+        showHeroOnly ? "overflow-hidden" : "overflow-y-auto snap-y snap-mandatory"
+      }`}
     >
 
       {/* HERO (unchanged) */}
@@ -188,101 +177,136 @@ export default function Home() {
         </div>
       </div>
 
-      {/* NEXT CONTENT */}
-      <div
-        ref={inviteRef}
-        id="invitation"
-        className="relative h-[100dvh] snap-start [scroll-snap-stop:always] [content-visibility:auto] [contain-intrinsic-size:100dvh]"
+      <Dialog
+        open={closedNoticeOpen}
+        onOpenChange={(open) => {
+          if (!open && inviteId) setDismissedClosedInviteId(inviteId)
+        }}
       >
-        <div className="grid h-full place-items-center pt-[96px] pb-[14rem] md:pb-[12rem] box-border">
-          <div className="w-full max-w-[min(92vw,84rem)] px-4">
-            <div className="grid gap-8 md:grid-cols-[0.9fr_1.1fr] md:items-start">
-              <div
-                className={`
-                  ${revealBase} ${inviteInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"} delay-[320ms]
-                  hidden md:block
-                  mx-auto w-full md:max-w-[24rem] lg:max-w-[28rem]
-                `}
-              >
-                <div className="aspect-[4/5] overflow-hidden rounded-[20px]">
-                  <img
-                    src="/images/welcome.jpg"
-                    alt="Mika and Darshika together"
-                    className="h-full w-full object-cover"
-                    loading="lazy"
-                    decoding="async"
-                  />
-                </div>
-              </div>
-              <div className="flex w-full flex-col items-center text-center md:items-start md:text-left md:-mt-2 md:min-h-[26rem]">
-                <div
-                  className={`
-                    text-[clamp(2.4rem,8vw,4.4rem)]
-                    tracking-tight
-                    text-white
-                    pb-6 sm:pb-8
-                    leading-none
-                    ${revealBase} ${inviteInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"} delay-[640ms]
-                  `}
-                >
-                  {guestName ? `Hi ${guestName}!` : "Hi there!"}
-                </div>
-                <div className="w-full max-w-[min(92vw,72rem)] px-2 md:px-0 flex-1 flex">
+        <DialogContent className="max-w-[min(92vw,32rem)] rounded-[24px] border-white/30 bg-rose-50 text-rose-950 shadow-xl">
+          <DialogHeader>
+            <DialogTitle className={`${sangbleu.className} text-2xl text-rose-950`}>
+              Online RSVP Has Closed
+            </DialogTitle>
+            <DialogDescription className="text-sm leading-relaxed text-rose-900/80">
+              Thank you for checking in with us. Online RSVPs for this invitation are now
+              closed. If you need to confirm or update your attendance, please email{" "}
+              <a className="underline underline-offset-4" href="mailto:wedding@mikadarshika.com">
+                wedding@mikadarshika.com
+              </a>{" "}
+              and Mika &amp; Darshika will help directly.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogClose asChild>
+            <Button
+              type="button"
+              className="mt-2 w-full rounded-full bg-rose-900 text-rose-50 hover:bg-rose-950"
+            >
+              Close
+            </Button>
+          </DialogClose>
+        </DialogContent>
+      </Dialog>
+
+      {!showHeroOnly ? (
+        <>
+          {/* NEXT CONTENT */}
+          <div
+            ref={inviteRef}
+            id="invitation"
+            className="relative h-[100dvh] snap-start [scroll-snap-stop:always] [content-visibility:auto] [contain-intrinsic-size:100dvh]"
+          >
+            <div className="grid h-full place-items-center pt-[96px] pb-[14rem] md:pb-[12rem] box-border">
+              <div className="w-full max-w-[min(92vw,84rem)] px-4">
+                <div className="grid gap-8 md:grid-cols-[0.9fr_1.1fr] md:items-start">
                   <div
                     className={`
-                      rounded-[28px]
-                      border border-white/60
-                      bg-white/5
-                      px-4 py-6 sm:px-6 sm:py-8 md:px-10 md:py-10
-                      backdrop-blur-[2px]
-                      ${revealBase} ${inviteInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"} delay-[960ms]
+                      ${revealBase} ${inviteInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"} delay-[320ms]
+                      hidden md:block
+                      mx-auto w-full md:max-w-[24rem] lg:max-w-[28rem]
                     `}
                   >
-                    <div
-                      className={`
-                        ${sangbleu.className}
-                        mx-auto max-w-[70ch]
-                        text-[clamp(0.95rem,2.3vw,1.6rem)]
-                        font-normal
-                        leading-snug sm:leading-relaxed
-                        text-white/95
-                        ${revealBase} ${inviteInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-3"} delay-[1280ms]
-                      `}
-                    >
-                      <div className="text-[clamp(0.95rem,2.2vw,1.4rem)] text-white/95">
-                        Uday &amp; Sashi Narayan and Sophia Sangsongkhram
-                      </div>
-                      <div className="mt-2 sm:mt-3 text-[clamp(0.95rem,2.2vw,1.4rem)] text-white/95">
-                        joyfully invite you to celebrate the wedding of
-                      </div>
-                      <div className="mt-2 sm:mt-3 text-[clamp(0.95rem,2.2vw,1.4rem)] text-white/95">
-                        Mika &amp; Darshika
-                      </div>
+                    <div className="aspect-[4/5] overflow-hidden rounded-[20px]">
+                      <img
+                        src="/images/welcome.jpg"
+                        alt="Mika and Darshika together"
+                        className="h-full w-full object-cover"
+                        loading="lazy"
+                        decoding="async"
+                      />
                     </div>
+                  </div>
+                  <div className="flex w-full flex-col items-center text-center md:items-start md:text-left md:-mt-2 md:min-h-[26rem]">
                     <div
                       className={`
-                        ${sangbleu.className}
-                        mt-6 sm:mt-8
-                        text-[clamp(0.78rem,1.9vw,1.05rem)]
-                        font-medium
-                        tracking-[0.1em]
-                        leading-snug sm:leading-relaxed
-                        text-white/90
-                        ${revealBase} ${inviteInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-3"} delay-[1600ms]
+                        text-[clamp(2.4rem,8vw,4.4rem)]
+                        tracking-tight
+                        text-white
+                        pb-6 sm:pb-8
+                        leading-none
+                        ${revealBase} ${inviteInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"} delay-[640ms]
                       `}
                     >
-                      <div className="text-white/85">
-                        Details
-                      </div>
-                      <div className="mt-3">
-                        Wedding date: 9 January 2027
-                      </div>
-                      <div className="mt-2">
-                        Residence: Narayan Residence, Glen Innes, Auckland, New Zealand
-                      </div>
-                      <div className="mt-6 sm:mt-8">
-                        Kindly RSVP by{" "}
-                        <span className={`${sangbleu.className} font-bold`}>31 March 2026</span>
+                      {guestName ? `Hi ${guestName}!` : "Hi there!"}
+                    </div>
+                    <div className="w-full max-w-[min(92vw,72rem)] px-2 md:px-0 flex-1 flex">
+                      <div
+                        className={`
+                          rounded-[28px]
+                          border border-white/60
+                          bg-white/5
+                          px-4 py-6 sm:px-6 sm:py-8 md:px-10 md:py-10
+                          backdrop-blur-[2px]
+                          ${revealBase} ${inviteInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"} delay-[960ms]
+                        `}
+                      >
+                        <div
+                          className={`
+                            ${sangbleu.className}
+                            mx-auto max-w-[70ch]
+                            text-[clamp(0.95rem,2.3vw,1.6rem)]
+                            font-normal
+                            leading-snug sm:leading-relaxed
+                            text-white/95
+                            ${revealBase} ${inviteInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-3"} delay-[1280ms]
+                          `}
+                        >
+                          <div className="text-[clamp(0.95rem,2.2vw,1.4rem)] text-white/95">
+                            Uday &amp; Sashi Narayan and Sophia Sangsongkhram
+                          </div>
+                          <div className="mt-2 sm:mt-3 text-[clamp(0.95rem,2.2vw,1.4rem)] text-white/95">
+                            joyfully invite you to celebrate the wedding of
+                          </div>
+                          <div className="mt-2 sm:mt-3 text-[clamp(0.95rem,2.2vw,1.4rem)] text-white/95">
+                            Mika &amp; Darshika
+                          </div>
+                        </div>
+                        <div
+                          className={`
+                            ${sangbleu.className}
+                            mt-6 sm:mt-8
+                            text-[clamp(0.78rem,1.9vw,1.05rem)]
+                            font-medium
+                            tracking-[0.1em]
+                            leading-snug sm:leading-relaxed
+                            text-white/90
+                            ${revealBase} ${inviteInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-3"} delay-[1600ms]
+                          `}
+                        >
+                          <div className="text-white/85">
+                            Details
+                          </div>
+                          <div className="mt-3">
+                            Wedding date: 9 January 2027
+                          </div>
+                          <div className="mt-2">
+                            Residence: Narayan Residence, Glen Innes, Auckland, New Zealand
+                          </div>
+                          <div className="mt-6 sm:mt-8">
+                            Kindly RSVP by{" "}
+                            <span className={`${sangbleu.className} font-bold`}>31 March 2026</span>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -290,15 +314,13 @@ export default function Home() {
               </div>
             </div>
           </div>
-        </div>
-      </div>
-
-      {/* SLIDE 3 */}
-      <div
-        ref={scheduleRef}
-        id="schedule"
-        className="relative h-[100dvh] snap-start [scroll-snap-stop:always] [content-visibility:auto] [contain-intrinsic-size:100dvh]"
-      >
+          
+          {/* SLIDE 3 */}
+          <div
+            ref={scheduleRef}
+            id="schedule"
+            className="relative h-[100dvh] snap-start [scroll-snap-stop:always] [content-visibility:auto] [contain-intrinsic-size:100dvh]"
+          >
         <div className="grid h-full place-items-center pt-[96px] pb-[calc(19rem+env(safe-area-inset-bottom))] sm:pb-[18rem] md:pb-[12rem] box-border">
           <div className="w-full max-w-[min(92vw,84rem)] px-4">
             <div
@@ -336,7 +358,7 @@ export default function Home() {
                       ${revealBase} ${scheduleInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"} delay-[1120ms]
                     `}
                   >
-                    A schedule of the day's events and rituals will be posted later this year.
+                    A schedule of the day&apos;s events and rituals will be posted later this year.
                   </div>
                 </div>
               </div>
@@ -530,6 +552,8 @@ export default function Home() {
           </div>
         </div>
       </div>
+        </>
+      ) : null}
 
     </main>
   )
