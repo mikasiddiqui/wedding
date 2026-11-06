@@ -1,4 +1,4 @@
-import type { Metadata } from "next"
+import type { Metadata, Viewport } from "next"
 import "./globals.css"
 import { love } from "../app/fonts"
 import RoseBackground from "@/components/RoseBackground"
@@ -6,6 +6,10 @@ import Header from "@/components/Header"
 
 const siteUrl = "https://mikadarshika.com"
 const ogImageJpg = `${siteUrl}/og-social.jpg`
+
+export const viewport: Viewport = {
+  themeColor: "#c98f96",
+}
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -72,6 +76,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      <head>
+        {/* The RSVP API answers from these hosts; connecting early shortens the guest lookup. */}
+        <link rel="preconnect" href="https://script.google.com" />
+        <link rel="preconnect" href="https://script.googleusercontent.com" crossOrigin="anonymous" />
+      </head>
       <body
         className={`${love.className} min-h-screen bg-[#c98f96] text-white antialiased`}
       >

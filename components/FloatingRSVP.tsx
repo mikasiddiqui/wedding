@@ -1,6 +1,7 @@
 "use client"
 
-import { useCallback, useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
+import { normalizeConfirmed, refreshInviteAccess, useInviteRecord } from "@/lib/use-invite-access"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Label } from "@/components/ui/label"
@@ -30,7 +31,7 @@ type RemoteInviteState = {
   invite: InviteRecord | null
   loading: boolean
   error: string | null
-  refresh: () => void
+  refresh: () => Promise<void>
 }
 
 const buildApiHeaders = (token?: string, contentType?: string) => {
@@ -40,84 +41,11 @@ const buildApiHeaders = (token?: string, contentType?: string) => {
   return headers
 }
 
-const normalizeConfirmed = (value: unknown): boolean | null => {
-  if (value === null || value === undefined) return null
-  if (typeof value === "string") {
-    const trimmed = value.trim()
-    if (!trimmed) return null
-    if (trimmed === "1") return true
-    if (trimmed === "0") return false
-    const num = Number(trimmed)
-    return Number.isNaN(num) ? Boolean(trimmed) : Boolean(num)
-  }
-  if (typeof value === "number") return value !== 0
-  if (typeof value === "boolean") return value
-  return Boolean(value)
-}
-
-const useRemoteInvite = (inviteId?: string): RemoteInviteState => {
-  const apiUrl = process.env.NEXT_PUBLIC_RSVP_API_URL
-  const apiToken = process.env.NEXT_PUBLIC_RSVP_API_TOKEN
-  const [invite, setInvite] = useState<InviteRecord | null>(null)
-  const [loading, setLoading] = useState(Boolean(apiUrl && inviteId))
-  const [error, setError] = useState<string | null>(null)
-
-  const refresh = useCallback(() => {
-    if (!apiUrl || !inviteId) return
-    let active = true
-    setLoading(true)
-    setError(null)
-    fetch(`${apiUrl}?inviteId=${encodeURIComponent(inviteId)}`, {
-      method: "GET",
-      headers: buildApiHeaders(apiToken),
-    })
-      .then(async (res) => {
-        if (!res.ok) throw new Error("Failed to load RSVP data.")
-        return (await res.json()) as InviteRecord
-      })
-      .then((data) => {
-        if (active) setInvite(data)
-      })
-      .catch((err) => {
-        if (active) setError(err.message || "Unable to load RSVP data.")
-      })
-      .finally(() => {
-        if (active) setLoading(false)
-      })
-
-    return () => {
-      active = false
-    }
-  }, [apiUrl, inviteId, apiToken])
-
-  useEffect(() => {
-    if (!apiUrl || !inviteId) return
-
-    let active = true
-    fetch(`${apiUrl}?inviteId=${encodeURIComponent(inviteId)}`, {
-      method: "GET",
-      headers: buildApiHeaders(apiToken),
-    })
-      .then(async (res) => {
-        if (!res.ok) throw new Error("Failed to load RSVP data.")
-        return (await res.json()) as InviteRecord
-      })
-      .then((data) => {
-        if (active) setInvite(data)
-      })
-      .catch((err) => {
-        if (active) setError(err.message || "Unable to load RSVP data.")
-      })
-      .finally(() => {
-        if (active) setLoading(false)
-      })
-
-    return () => {
-      active = false
-    }
-  }, [apiUrl, inviteId, apiToken])
-
-  return { invite, loading, error, refresh }
+// Shares the page's invite lookup, and refreshing it updates the page (e.g. the address).
+const useRemoteInvite = (): RemoteInviteState => {
+  const { record, loading, error } = useInviteRecord()
+  const invite = record && Array.isArray(record.people) ? (record as InviteRecord) : null
+  return { invite, loading, error, refresh: refreshInviteAccess }
 }
 
 export default function FloatingRSVP({
@@ -130,6 +58,7 @@ export default function FloatingRSVP({
   const [sent, setSent] = useState(false)
   const [faqExpanded, setFaqExpanded] = useState(false)
   const [faqInView, setFaqInView] = useState(false)
+  const [overSchedule, setOverSchedule] = useState(false)
   const [selected, setSelected] = useState<Record<string, "attending" | "not">>({})
   const [confirmed, setConfirmed] = useState<Record<string, boolean | null>>({})
 
@@ -146,7 +75,7 @@ export default function FloatingRSVP({
     loading: remoteLoading,
     error: remoteError,
     refresh: refreshRemoteInvite,
-  } = useRemoteInvite(inviteId)
+  } = useRemoteInvite()
   const inviteTitle = useMemo(() => {
     const remoteTitle = remoteInvite?.title?.trim()
     if (remoteTitle) return remoteInvite?.title ?? guestName
@@ -265,6 +194,24 @@ export default function FloatingRSVP({
     return () => observer.disconnect()
   }, [])
 
+  // The schedule can be taller than the screen, so step aside while it's under the button.
+  useEffect(() => {
+    if (typeof window === "undefined") return
+
+    const scheduleEl = document.getElementById("schedule")
+    const mainEl = document.querySelector("main")
+    if (!scheduleEl || !mainEl) return
+
+    const observer = new IntersectionObserver(
+      ([entry]) => setOverSchedule(entry.isIntersecting),
+      // The 1px stops the section just below the screen from counting as touching it.
+      { root: mainEl, rootMargin: "-60% 0px -1px 0px" }
+    )
+
+    observer.observe(scheduleEl)
+    return () => observer.disconnect()
+  }, [])
+
   const shouldMuteRsvp = faqExpanded && faqInView
 
   const handleConfirm = async () => {
@@ -345,10 +292,14 @@ export default function FloatingRSVP({
   }
 
   return (
-    <div className="fixed inset-x-0 bottom-16 md:bottom-20 z-[200] flex justify-center pointer-events-none">
+    <div className="fixed inset-x-0 bottom-16 md:bottom-20 z-30 flex justify-center pointer-events-none animate-in fade-in duration-500">
       <div
-        className={`pointer-events-auto transition-opacity duration-300 ${
-          shouldMuteRsvp ? "opacity-35 pointer-events-none" : "opacity-100"
+        className={`transition-opacity duration-300 ${
+          overSchedule
+            ? "opacity-0 pointer-events-none"
+            : shouldMuteRsvp
+              ? "opacity-35 pointer-events-none"
+              : "opacity-100 pointer-events-auto"
         }`}
       >
         <Dialog open={open} onOpenChange={setOpen}>
@@ -360,36 +311,36 @@ export default function FloatingRSVP({
               {submitting ? "SENDING..." : sent ? "SENT!" : "RSVP"}
             </Button>
           </DialogTrigger>
-          <DialogContent className={`${sangbleu.className} bg-[#c98f96] text-white border-white/20`}>
+          <DialogContent className={`${sangbleu.className} bg-[#996470] text-white border-white/20`}>
             <DialogHeader>
               <DialogTitle className="text-[clamp(1.6rem,3vw,2.2rem)] tracking-tight">
                 Confirm your RSVP
               </DialogTitle>
-              <DialogDescription className="text-white/80">
+              <DialogDescription className="text-white">
                 Select who is attending for {inviteTitle}.
                 You can update your selection any time and confirm again.
               </DialogDescription>
             </DialogHeader>
 
-            <div className="mt-4 rounded-[16px] border border-white/20 bg-white/5 px-4 py-4">
-              <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,8.5rem)] items-center gap-2 border-b border-white/10 pb-3 sm:grid-cols-[minmax(0,1fr)_auto_auto] sm:gap-4">
-                <div className="text-[0.72rem] uppercase tracking-[0.14em] text-white/80 sm:text-sm sm:tracking-[0.2em]">
+            <div className="mt-4 border-t border-white/30 pt-4">
+              <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,8.5rem)] items-center gap-2 border-b border-white/30 pb-3 sm:grid-cols-[minmax(0,1fr)_auto_auto] sm:gap-4">
+                <div className="text-[0.72rem] uppercase tracking-[0.14em] text-white sm:text-sm sm:tracking-[0.2em]">
                   Guests
                 </div>
-                <div className="hidden justify-self-center text-[0.72rem] uppercase tracking-[0.14em] text-white/80 sm:block sm:text-sm sm:tracking-[0.2em]">
+                <div className="hidden justify-self-center text-[0.72rem] uppercase tracking-[0.14em] text-white sm:block sm:text-sm sm:tracking-[0.2em]">
                   Status
                 </div>
-                <div className="text-[0.72rem] uppercase tracking-[0.14em] text-white/80 sm:text-sm sm:tracking-[0.2em]">
+                <div className="text-[0.72rem] uppercase tracking-[0.14em] text-white sm:text-sm sm:tracking-[0.2em]">
                   Attending
                 </div>
               </div>
               <div className="mt-4 space-y-3">
                 {remoteLoading ? (
-                  <div className="text-sm text-white/70">Loading guest list…</div>
+                  <div className="text-sm text-white">Loading guest list…</div>
                 ) : (
                   <>
                     {remoteError && (
-                      <div className="text-sm text-white/70">
+                      <div className="text-sm text-white">
                         Could not load the latest RSVP status. Showing local data.
                       </div>
                     )}
@@ -416,10 +367,10 @@ export default function FloatingRSVP({
                             variant="outline"
                             className={`hidden sm:inline-flex ${
                               isNotConfirmed
-                                ? "border-white/30 text-white/70"
+                                ? "border-white/40 text-white"
                                 : isAttending
                                 ? "border-white/60 bg-white text-rose-900"
-                                : "border-white/30 text-white/70"
+                                : "border-white/40 text-white"
                             }`}
                           >
                             {statusLabel}
@@ -441,7 +392,7 @@ export default function FloatingRSVP({
                                 id={`${person.name}-attending`}
                                 className="border-white text-rose-900 data-[state=checked]:border-white data-[state=checked]:bg-white"
                               />
-                              <Label htmlFor={`${person.name}-attending`} className="text-[0.95rem] text-white/90 sm:text-base">
+                              <Label htmlFor={`${person.name}-attending`} className="text-[0.95rem] text-white sm:text-base">
                                 Yes
                               </Label>
                             </div>
@@ -451,7 +402,7 @@ export default function FloatingRSVP({
                                 id={`${person.name}-not`}
                                 className="border-white text-rose-900 data-[state=checked]:border-white data-[state=checked]:bg-white"
                               />
-                              <Label htmlFor={`${person.name}-not`} className="text-[0.95rem] text-white/90 sm:text-base">
+                              <Label htmlFor={`${person.name}-not`} className="text-[0.95rem] text-white sm:text-base">
                                 No
                               </Label>
                             </div>

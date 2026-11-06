@@ -127,4 +127,69 @@
     @apply bg-background text-foreground;
     overflow: hidden;
   }
+  ::selection {
+    background: #502731;
+    color: #fff;
+  }
+}
+
+/*
+ * The one surface for homepage content. Wine at 50% over the rose gives white text
+ * about 4.7:1. Dialogs use the same colour as a solid (#996470), so they match.
+ */
+.panel {
+  background: rgb(105 57 67 / 0.5);
+  border-radius: 24px;
+  color: #fff;
+}
+
+/*
+ * Entrance motion. Only opacity and transform, so it runs on the compositor.
+ * The hero uses a CSS animation so it plays before the JavaScript has loaded;
+ * sections use `.reveal`, switched on by `data-inview` on their <section>.
+ */
+@keyframes hero-rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: var(--rest-opacity, 1);
+    transform: none;
+  }
+}
+
+.hero-rise {
+  opacity: var(--rest-opacity, 1);
+  animation: hero-rise 800ms cubic-bezier(0.16, 1, 0.3, 1) var(--delay, 0ms) both;
+}
+
+.reveal {
+  opacity: 0;
+  transform: translateY(10px);
+  transition:
+    opacity 500ms cubic-bezier(0.16, 1, 0.3, 1) var(--delay, 0ms),
+    transform 500ms cubic-bezier(0.16, 1, 0.3, 1) var(--delay, 0ms);
+}
+
+[data-inview] .reveal {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  main {
+    scroll-behavior: smooth;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-rise {
+    animation: none;
+  }
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
 }
