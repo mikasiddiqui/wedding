@@ -20,13 +20,13 @@ export default function ClosedNotice({ onDismiss }: { onDismiss: () => void }) {
         if (!open) onDismiss()
       }}
     >
-      <DialogContent className="border-white/20 bg-[#996470] text-white">
+      <DialogContent className="border-[var(--line)] bg-[var(--ground)] text-[var(--ink)]">
         <DialogHeader>
           <DialogTitle className={`${sangbleu.className} text-[clamp(1.6rem,3vw,2.2rem)] tracking-tight`}>
             Online RSVP Has Closed
           </DialogTitle>
           <DialogDescription
-            className={`${sangbleu.className} text-[clamp(1rem,2.1vw,1.2rem)] leading-relaxed text-white`}
+            className={`${sangbleu.className} text-[clamp(1rem,2.1vw,1.2rem)] leading-relaxed text-[var(--ink)]`}
           >
             Thank you for checking in with us. Online RSVPs for this invitation are now
             closed. If you need to confirm or update your attendance, please message Mika
@@ -38,7 +38,7 @@ export default function ClosedNotice({ onDismiss }: { onDismiss: () => void }) {
             <Button
               variant="default"
               type="button"
-              className={`${sangbleu.className} bg-white/90 text-black/80 hover:bg-white`}
+              className={`${sangbleu.className} bg-[var(--ink)] text-[var(--ground)] hover:bg-[var(--ink)]/90`}
             >
               Close
             </Button>

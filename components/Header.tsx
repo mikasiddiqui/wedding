@@ -7,11 +7,11 @@ import { useInviteAccess } from "@/lib/use-invite-access"
 const GuestHeader = dynamic(() => import("@/components/GuestHeader"), { ssr: false })
 
 export default function Header() {
-  const { inviteId, rsvpClosed, attending } = useInviteAccess()
+  const { inviteId, guestTitle, rsvpClosed, attending } = useInviteAccess()
 
   if (!inviteId || (rsvpClosed && !attending)) {
     return null
   }
 
-  return <GuestHeader />
+  return <GuestHeader inviteId={inviteId} guestName={guestTitle} rsvpClosed={rsvpClosed} />
 }

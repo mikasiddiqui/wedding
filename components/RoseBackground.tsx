@@ -44,7 +44,7 @@ export default function RoseBackground() {
       poster="/video/rose-poster.webp"
       aria-hidden="true"
       tabIndex={-1}
-      className="fixed inset-0 -z-10 h-full w-full object-cover pointer-events-none"
+      className="rose-video fixed inset-0 -z-10 h-full w-full object-cover pointer-events-none"
     >
       <source src="/video/rose.webm" type='video/webm; codecs="vp9"' />
       <source src="/video/rose.mp4" type="video/mp4" />

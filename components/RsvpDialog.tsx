@@ -21,8 +21,9 @@ import { sangbleu } from "../app/fonts"
 type Person = { name: string; confirmed?: number | boolean | string | null }
 type InviteRecord = { title?: string; people: Person[] }
 
-type FloatingRSVPProps = {
-  dialogOpen: boolean
+type RsvpDialogProps = {
+  triggerClassName?: string
+  triggerLabel?: string
   inviteId?: string
   guestName?: string
 }
@@ -48,25 +49,17 @@ const useRemoteInvite = (): RemoteInviteState => {
   return { invite, loading, error, refresh: refreshInviteAccess }
 }
 
-export default function FloatingRSVP({
-  dialogOpen,
+export default function RsvpDialog({
+  triggerClassName = "pill",
+  triggerLabel = "RSVP",
   inviteId = "unknown",
   guestName = "Unknown Guest",
-}: FloatingRSVPProps) {
+}: RsvpDialogProps) {
   const [open, setOpen] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [sent, setSent] = useState(false)
-  const [faqExpanded, setFaqExpanded] = useState(false)
-  const [faqInView, setFaqInView] = useState(false)
-  const [overSchedule, setOverSchedule] = useState(false)
   const [selected, setSelected] = useState<Record<string, "attending" | "not">>({})
   const [confirmed, setConfirmed] = useState<Record<string, boolean | null>>({})
-
-  const base = `${sangbleu.className} font-medium
-    h-12 rounded-full px-12 text-lg tracking-widest transition-colors`
-
-  const hero = "bg-white/80 text-black/70 hover:bg-white"
-  const dialog = "bg-red-900/80 text-rose-100 hover:bg-red-900"
 
   const apiUrl = process.env.NEXT_PUBLIC_RSVP_API_URL
   const apiToken = process.env.NEXT_PUBLIC_RSVP_API_TOKEN
@@ -147,73 +140,6 @@ export default function FloatingRSVP({
     setSelected(next)
   }, [open, people, confirmed, remoteFetched, remoteNameSet])
 
-  useEffect(() => {
-    if (typeof window === "undefined") return
-
-    const faqEl = document.getElementById("faq")
-    if (!faqEl) return
-
-    const updateFaqExpanded = () => {
-      const hasOpenItem = Boolean(
-        faqEl.querySelector('[data-slot="accordion-item"][data-state="open"]')
-      )
-      setFaqExpanded(hasOpenItem)
-    }
-
-    updateFaqExpanded()
-
-    const observer = new MutationObserver(updateFaqExpanded)
-    observer.observe(faqEl, {
-      subtree: true,
-      childList: true,
-      attributes: true,
-      attributeFilter: ["data-state"],
-    })
-
-    return () => observer.disconnect()
-  }, [])
-
-  useEffect(() => {
-    if (typeof window === "undefined") return
-
-    const faqEl = document.getElementById("faq")
-    const mainEl = document.querySelector("main")
-    if (!faqEl || !mainEl) return
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        setFaqInView(entry.isIntersecting && entry.intersectionRatio >= 0.25)
-      },
-      {
-        root: mainEl,
-        threshold: [0, 0.25, 0.5],
-      }
-    )
-
-    observer.observe(faqEl)
-    return () => observer.disconnect()
-  }, [])
-
-  // The schedule can be taller than the screen, so step aside while it's under the button.
-  useEffect(() => {
-    if (typeof window === "undefined") return
-
-    const scheduleEl = document.getElementById("schedule")
-    const mainEl = document.querySelector("main")
-    if (!scheduleEl || !mainEl) return
-
-    const observer = new IntersectionObserver(
-      ([entry]) => setOverSchedule(entry.isIntersecting),
-      // The 1px stops the section just below the screen from counting as touching it.
-      { root: mainEl, rootMargin: "-60% 0px -1px 0px" }
-    )
-
-    observer.observe(scheduleEl)
-    return () => observer.disconnect()
-  }, [])
-
-  const shouldMuteRsvp = faqExpanded && faqInView
-
   const handleConfirm = async () => {
     try {
       setSubmitting(true)
@@ -292,55 +218,42 @@ export default function FloatingRSVP({
   }
 
   return (
-    <div className="fixed inset-x-0 bottom-16 md:bottom-20 z-30 flex justify-center pointer-events-none animate-in fade-in duration-500">
-      <div
-        className={`transition-opacity duration-300 ${
-          overSchedule
-            ? "opacity-0 pointer-events-none"
-            : shouldMuteRsvp
-              ? "opacity-35 pointer-events-none"
-              : "opacity-100 pointer-events-auto"
-        }`}
-      >
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
-            <Button
-              type="button"
-              className={`${base} ${dialogOpen ? dialog : hero}`}
-            >
-              {submitting ? "SENDING..." : sent ? "SENT!" : "RSVP"}
-            </Button>
+            <button type="button" className={`${sangbleu.className} ${triggerClassName}`}>
+              {submitting ? "Sending..." : sent ? "Sent!" : triggerLabel}
+          </button>
           </DialogTrigger>
-          <DialogContent className={`${sangbleu.className} bg-[#996470] text-white border-white/20`}>
+          <DialogContent className={`${sangbleu.className} bg-[var(--ground)] text-[var(--ink)] border-[var(--line)]`}>
             <DialogHeader>
               <DialogTitle className="text-[clamp(1.6rem,3vw,2.2rem)] tracking-tight">
                 Confirm your RSVP
               </DialogTitle>
-              <DialogDescription className="text-white">
+              <DialogDescription className="text-[var(--ink)]">
                 Select who is attending for {inviteTitle}.
                 You can update your selection any time and confirm again.
               </DialogDescription>
             </DialogHeader>
 
-            <div className="mt-4 border-t border-white/30 pt-4">
-              <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,8.5rem)] items-center gap-2 border-b border-white/30 pb-3 sm:grid-cols-[minmax(0,1fr)_auto_auto] sm:gap-4">
-                <div className="text-[0.72rem] uppercase tracking-[0.14em] text-white sm:text-sm sm:tracking-[0.2em]">
+            <div className="mt-4 border-t border-[var(--line)] pt-4">
+              <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,8.5rem)] items-center gap-2 border-b border-[var(--line)] pb-3 sm:grid-cols-[minmax(0,1fr)_auto_auto] sm:gap-4">
+                <div className="text-[0.72rem] uppercase tracking-[0.14em] text-[var(--ink)] sm:text-sm sm:tracking-[0.2em]">
                   Guests
                 </div>
-                <div className="hidden justify-self-center text-[0.72rem] uppercase tracking-[0.14em] text-white sm:block sm:text-sm sm:tracking-[0.2em]">
+                <div className="hidden justify-self-center text-[0.72rem] uppercase tracking-[0.14em] text-[var(--ink)] sm:block sm:text-sm sm:tracking-[0.2em]">
                   Status
                 </div>
-                <div className="text-[0.72rem] uppercase tracking-[0.14em] text-white sm:text-sm sm:tracking-[0.2em]">
+                <div className="text-[0.72rem] uppercase tracking-[0.14em] text-[var(--ink)] sm:text-sm sm:tracking-[0.2em]">
                   Attending
                 </div>
               </div>
               <div className="mt-4 space-y-3">
                 {remoteLoading ? (
-                  <div className="text-sm text-white">Loading guest list…</div>
+                  <div className="text-sm text-[var(--ink)]">Loading guest list…</div>
                 ) : (
                   <>
                     {remoteError && (
-                      <div className="text-sm text-white">
+                      <div className="text-sm text-[var(--ink)]">
                         Could not load the latest RSVP status. Showing local data.
                       </div>
                     )}
@@ -367,10 +280,10 @@ export default function FloatingRSVP({
                             variant="outline"
                             className={`hidden sm:inline-flex ${
                               isNotConfirmed
-                                ? "border-white/40 text-white"
+                                ? "border-[var(--line)] text-[var(--ink)]"
                                 : isAttending
-                                ? "border-white/60 bg-white text-rose-900"
-                                : "border-white/40 text-white"
+                                ? "border-[var(--ink)] bg-[var(--ink)] text-[var(--ground)]"
+                                : "border-[var(--line)] text-[var(--ink)]"
                             }`}
                           >
                             {statusLabel}
@@ -390,9 +303,9 @@ export default function FloatingRSVP({
                               <RadioGroupItem
                                 value="attending"
                                 id={`${person.name}-attending`}
-                                className="border-white text-rose-900 data-[state=checked]:border-white data-[state=checked]:bg-white"
+                                className="border-[var(--ink)] text-[var(--ground)] data-[state=checked]:border-[var(--ink)] data-[state=checked]:bg-[var(--ink)] [&_svg]:fill-[var(--ground)]"
                               />
-                              <Label htmlFor={`${person.name}-attending`} className="text-[0.95rem] text-white sm:text-base">
+                              <Label htmlFor={`${person.name}-attending`} className="text-[0.95rem] text-[var(--ink)] sm:text-base">
                                 Yes
                               </Label>
                             </div>
@@ -400,9 +313,9 @@ export default function FloatingRSVP({
                               <RadioGroupItem
                                 value="not"
                                 id={`${person.name}-not`}
-                                className="border-white text-rose-900 data-[state=checked]:border-white data-[state=checked]:bg-white"
+                                className="border-[var(--ink)] text-[var(--ground)] data-[state=checked]:border-[var(--ink)] data-[state=checked]:bg-[var(--ink)] [&_svg]:fill-[var(--ground)]"
                               />
-                              <Label htmlFor={`${person.name}-not`} className="text-[0.95rem] text-white sm:text-base">
+                              <Label htmlFor={`${person.name}-not`} className="text-[0.95rem] text-[var(--ink)] sm:text-base">
                                 No
                               </Label>
                             </div>
@@ -417,7 +330,7 @@ export default function FloatingRSVP({
 
             <DialogFooter className="mt-4 sm:justify-between">
               <DialogClose asChild>
-                <Button variant="ghost" className="border border-white">
+                <Button variant="ghost" className="border border-[var(--ink)] text-[var(--ink)] hover:bg-[var(--ink)]/10 hover:text-[var(--ink)]">
                   Cancel
                 </Button>
               </DialogClose>
@@ -426,14 +339,12 @@ export default function FloatingRSVP({
                 type="button"
                 onClick={handleConfirm}
                 disabled={submitting || remoteLoading}
-                className="bg-white/90 text-black/80 hover:bg-white"
+                className="bg-[var(--ink)] text-[var(--ground)] hover:bg-[var(--ink)]/90"
               >
                 {submitting ? "SENDING..." : "Confirm"}
               </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
-      </div>
-    </div>
   )
 }

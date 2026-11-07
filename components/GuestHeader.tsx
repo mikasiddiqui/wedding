@@ -8,59 +8,68 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Menu, X } from "lucide-react"
+import { sangbleu } from "@/app/fonts"
+import RsvpDialog from "@/components/RsvpDialog"
 
-export default function GuestHeader() {
+const links = [
+  { href: "#invitation", label: "Invitation" },
+  { href: "#schedule", label: "Schedule" },
+  { href: "#faq", label: "FAQ" },
+  { href: "#gallery", label: "Gallery" },
+]
+
+type GuestHeaderProps = {
+  inviteId: string
+  guestName?: string
+  rsvpClosed: boolean
+}
+
+export default function GuestHeader({ inviteId, guestName, rsvpClosed }: GuestHeaderProps) {
   return (
-    <header className="fixed inset-x-0 top-0 z-40 grid h-[96px] grid-cols-2 items-center px-10 animate-in fade-in duration-500 bg-gradient-to-b from-[#be7f87] from-55% to-[#be7f87]/0">
-      <div className="text-lg font-semibold tracking-wide text-white">
-        M
-        <span className="mx-0.5 font-semibold">&</span>
-        D
-      </div>
+    <header className="site-header animate-in fade-in duration-1000">
+      <a href="#top" aria-label="Back to top" className="font-love justify-self-start text-[2.2rem] leading-none tracking-tight">
+        M&amp;D
+      </a>
 
-      <div className="flex justify-end">
+      <nav aria-label="Sections" className={`${sangbleu.className} hidden items-center gap-9 md:flex`}>
+        {links.map((link) => (
+          <a key={link.href} href={link.href} className="nav-link">
+            {link.label}
+          </a>
+        ))}
+      </nav>
+
+      <div className="flex items-center justify-end gap-1">
+        {rsvpClosed ? null : <RsvpDialog inviteId={inviteId} guestName={guestName} triggerClassName="pill" triggerLabel="RSVP" />}
+
         <Dialog>
           <DialogTrigger asChild>
-            <button aria-label="Open menu" className="flex h-12 w-12 items-center justify-center">
-              <Menu className="h-10 w-10 stroke-[1.5]" />
+            <button aria-label="Open menu" className="flex size-11 items-center justify-center md:hidden">
+              <Menu className="size-7" strokeWidth={1} />
             </button>
           </DialogTrigger>
 
-          <DialogContent fullScreen showCloseButton={false} className="bg-[#996470] text-white">
+          <DialogContent fullScreen showCloseButton={false} className="bg-[var(--ground)] text-[var(--ink)]">
             <DialogTitle className="sr-only">Navigation menu</DialogTitle>
 
-            <div className="grid h-[96px] grid-cols-2 items-center px-10">
-              <div className="text-lg font-semibold tracking-wide text-white">
-                M
-                <span className="mx-0.5 font-semibold">&</span>
-                D
-              </div>
-
-              <div className="flex justify-end">
-                <DialogClose asChild>
-                  <button aria-label="Close menu" className="flex h-14 w-14 items-center justify-center">
-                    <X className="h-10 w-10 stroke-[1.5] text-white" />
-                  </button>
-                </DialogClose>
-              </div>
+            <div className="flex h-[var(--nav-height)] items-center justify-between border-b border-[var(--line)] px-5">
+              <span className="font-love text-[2.2rem] leading-none tracking-tight">M&amp;D</span>
+              <DialogClose asChild>
+                <button aria-label="Close menu" className="flex size-11 items-center justify-center">
+                  <X className="size-7" strokeWidth={1} />
+                </button>
+              </DialogClose>
             </div>
 
-            <div className="px-12 pt-14 sm:pt-24">
-              <nav className="space-y-10 text-[clamp(3.5rem,8vw,6rem)] text-white leading-none">
-                <DialogClose asChild>
-                  <a href="#invitation" className="block">INVITATION</a>
+            <nav className="font-love space-y-8 px-5 pt-14 text-[clamp(3rem,15vw,5rem)] uppercase leading-none">
+              {links.map((link) => (
+                <DialogClose asChild key={link.href}>
+                  <a href={link.href} className="block">
+                    {link.label}
+                  </a>
                 </DialogClose>
-                <DialogClose asChild>
-                  <a href="#schedule" className="block">SCHEDULE</a>
-                </DialogClose>
-                <DialogClose asChild>
-                  <a href="#faq" className="block">FAQ</a>
-                </DialogClose>
-                <DialogClose asChild>
-                  <a href="#gallery" className="block">GALLERY</a>
-                </DialogClose>
-              </nav>
-            </div>
+              ))}
+            </nav>
           </DialogContent>
         </Dialog>
       </div>
