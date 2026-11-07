@@ -79,12 +79,6 @@ export default function GuestSections({
           <dt>Where</dt>
           <dd>{venueAddress ? `Narayan Residence, ${venueAddress}` : "Narayan Residence, Glen Innes, Auckland, New Zealand"}</dd>
         </div>
-        <div>
-          <dt>RSVP</dt>
-          <dd>
-            Kindly RSVP by <span className="font-bold">31 March 2026</span>
-          </dd>
-        </div>
       </dl>
 
       {/* INVITATION */}

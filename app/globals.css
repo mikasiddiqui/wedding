@@ -388,7 +388,7 @@ html[data-guest] .hero {
 
 @media (min-width: 768px) {
   .facts {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: 1fr 1.6fr;
   }
   .facts > div {
     padding: 1.4rem 1.5rem;
