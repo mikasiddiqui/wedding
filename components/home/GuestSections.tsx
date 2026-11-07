@@ -172,7 +172,7 @@ export default function GuestSections({
       <section className="block-section close">
         {rsvpClosed ? null : (
           <div className="close-rsvp">
-            <RsvpDialog inviteId={inviteId} guestName={guestName} triggerClassName="pill pill-lg" triggerLabel="RSVP" />
+            <RsvpDialog inviteId={inviteId} guestName={guestName} triggerClassName="pill pill-lg" triggerLabel="Edit RSVP" />
           </div>
         )}
         <Reveal

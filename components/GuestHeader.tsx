@@ -40,7 +40,7 @@ export default function GuestHeader({ inviteId, guestName, rsvpClosed }: GuestHe
       </nav>
 
       <div className="flex items-center justify-end gap-1">
-        {rsvpClosed ? null : <RsvpDialog inviteId={inviteId} guestName={guestName} triggerClassName="pill" triggerLabel="RSVP" />}
+        {rsvpClosed ? null : <RsvpDialog inviteId={inviteId} guestName={guestName} triggerClassName="pill" triggerLabel="Edit RSVP" />}
 
         <Dialog>
           <DialogTrigger asChild>

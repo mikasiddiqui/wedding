@@ -51,7 +51,7 @@ const useRemoteInvite = (): RemoteInviteState => {
 
 export default function RsvpDialog({
   triggerClassName = "pill",
-  triggerLabel = "RSVP",
+  triggerLabel = "Edit RSVP",
   inviteId = "unknown",
   guestName = "Unknown Guest",
 }: RsvpDialogProps) {
