@@ -3,4 +3,4 @@
 :HL["/_next/static/media/Love-s.p.e580c054.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
 :HL["/_next/static/media/PinyonScript-s.p.a9b8ae0d.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
 :HL["/fonts/wedding-amp.woff2","font",{"crossOrigin":"anonymous","type":"font/woff2"}]
-0:{"buildId":"sLvEv-N4lOGyrSv8DauMv","tree":{"name":"","paramType":null,"paramKey":"","hasRuntimePrefetch":false,"slots":{"children":{"name":"__PAGE__","paramType":null,"paramKey":"__PAGE__","hasRuntimePrefetch":false,"slots":null,"isRootLayout":false}},"isRootLayout":true},"staleTime":300}
+0:{"buildId":"xGEGArI-Mm8dMUXEVacIS","tree":{"name":"","paramType":null,"paramKey":"","hasRuntimePrefetch":false,"slots":{"children":{"name":"__PAGE__","paramType":null,"paramKey":"__PAGE__","hasRuntimePrefetch":false,"slots":null,"isRootLayout":false}},"isRootLayout":true},"staleTime":300}
