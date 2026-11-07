@@ -1,4 +1,6 @@
-:HL["/_next/static/chunks/f5d74da7b3368f02.css","style"]
-:HL["/_next/static/chunks/d40e95750ab1a35d.css","style"]
+:HL["/_next/static/chunks/be11512ae4d2506e.css","style"]
+:HL["/_next/static/chunks/dbc94302132a0a4f.css","style"]
 :HL["/_next/static/media/Love-s.p.e580c054.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
-0:{"buildId":"O2QsGeDVy16vdIjfYJpcQ","tree":{"name":"","paramType":null,"paramKey":"","hasRuntimePrefetch":false,"slots":{"children":{"name":"__PAGE__","paramType":null,"paramKey":"__PAGE__","hasRuntimePrefetch":false,"slots":null,"isRootLayout":false}},"isRootLayout":true},"staleTime":300}
+:HL["/_next/static/media/PinyonScript-s.p.a9b8ae0d.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
+:HL["/fonts/wedding-amp.woff2","font",{"crossOrigin":"anonymous","type":"font/woff2"}]
+0:{"buildId":"esWk_PRwYVX1cNbJiHMSm","tree":{"name":"","paramType":null,"paramKey":"","hasRuntimePrefetch":false,"slots":{"children":{"name":"__PAGE__","paramType":null,"paramKey":"__PAGE__","hasRuntimePrefetch":false,"slots":null,"isRootLayout":false}},"isRootLayout":true},"staleTime":300}
